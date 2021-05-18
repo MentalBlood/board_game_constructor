@@ -1,0 +1,1 @@
+"use strict";function Board(e){return React.createElement("div",{className:"board"},e.board.map((e=>React.createElement(Cell,{key:e.x+"_"+e.y,x:e.x,y:e.y,width:90}))))}
