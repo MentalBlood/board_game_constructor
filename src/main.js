@@ -206,11 +206,7 @@ class Root extends React.Component {
 				this.state.config.board.push({'x': x, 'y': y});
 		
 		this.state.config_text = JSON.stringify(this.state.config);
-		this.state.board = this.placeFiguresOnBoard(
-			this.state.config.cell,
-			this.state.config.initial_position,
-			this.state.config.board
-		);
+		this.state = Object.assign(this.state, this.compile_());
 	}
 
 	onConfigTextChange(e) {
@@ -218,21 +214,28 @@ class Root extends React.Component {
 		this.setState({'config_text': new_text});
 	}
 
-	insertByCoordinates(cell_coords_names, cell, dict, element_to_insert) {
+	insertByCoordinates(cell_coords_names, cell, dict, element_to_insert, create_path=true) {
 		const coordinates_list = cell_coords_names.map(name => cell[name]);
 		let current_level = dict;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
 			const c = coordinates_list[i];
-			if (!current_level[c])
-				current_level[c] = {};
+			if (!current_level[c]) {
+				if (create_path)
+					current_level[c] = {};
+				else 
+					return;
+			}
 			current_level = current_level[c];
 		}
 		const c = coordinates_list[coordinates_list.length - 1];
+		if (!current_level[c] && !create_path)
+			return;
 		current_level[c] = element_to_insert;
 	}
 
 	placeFiguresOnBoard(cell_coords_names, position, board_config) {
 		const result_board = {};
+		console.log('placeFiguresOnBoard', board_config.length)
 		for (const cell of board_config) {
 			this.insertByCoordinates(cell_coords_names, cell, result_board, {});
 		}
@@ -242,7 +245,7 @@ class Root extends React.Component {
 					this.insertByCoordinates(cell_coords_names, coordinates, result_board, {
 						'player': player,
 						'figure': figure
-					});
+					}, false);
 				}
 			}
 		}
@@ -254,19 +257,22 @@ class Root extends React.Component {
 		return keys_and_elements.map(k_e => Object.assign({}, k_e.element, dictFromTwoLists(cell_coords_names, k_e.keys)));
 	}
 
+	compile_() {
+		const new_config = JSON.parse(this.state.config_text);
+		return {
+			'config': new_config,
+			'position': new_config.initial_position,
+			'board': this.placeFiguresOnBoard(
+				new_config.cell,
+				new_config.initial_position,
+				new_config.board
+			)
+		};
+	}
+
 	compile() {
 		const new_config = JSON.parse(this.state.config_text);
-		if (this.state.config) {
-			this.setState({
-				'config': new_config,
-				'position': new_config.initial_position,
-				'board': this.placeFiguresOnBoard(
-					new_config.cell,
-					new_config.initial_position,
-					new_config.board
-				)
-			});
-		}
+		this.setState(this.compile_(), () => this.forceUpdate());
 	}
 
 	render() {
