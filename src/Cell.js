@@ -1,27 +1,42 @@
 'use strict';
 
 function Cell(props) {
-	const x = props.x;
-	const y = props.y;
-	const width = props.width;
+	const {x, y, size, figure, player} = props;
+	const colors = {
+		'white': {
+			'cell': 'white',
+			'text': 'black'
+		},
+		'black': {
+			'cell': 'black',
+			'text': 'white'
+		},
+		undefined: {
+			'cell': 'darkgrey',
+			'text': 'black'
+		}
+	}[player];
 
 	const points = `
-		${width},				${width / 2}
-		${width / 300 * 225},	${width / 300 * 280}
-		${width / 300 * 75},	${width / 300 * 280}
-		0,						${width / 2}
-		${width / 300 * 75},	${width / 300 * 20}
-		${width / 300 * 225},	${width / 300 * 20}
+		${size},				${size / 2}
+		${size / 300 * 225},	${size / 300 * 280}
+		${size / 300 * 75},		${size / 300 * 280}
+		0,						${size / 2}
+		${size / 300 * 75},		${size / 300 * 20}
+		${size / 300 * 225},	${size / 300 * 20}
 	`;
 
 	return <svg className="cell" style={{
-			'width': width + 'px',
-			'height': 280 / 300 * width + 'px',
-			'left': x * 260 / 300 * width + 'px',
-			'top': y * width + x * width / 2 + 'px'
+			'width': size + 'px',
+			'height': 280 / 300 * size + 'px',
+			'left': x * 260 / 300 * size + 'px',
+			'top': y * size + x * size / 2 + 'px'
 		}}
 		xmlns="http://www.w3.org/2000/svg" version="1.1">
-		<polygon fill="white" points={points}></polygon>
-		<text x="30" y="50" fill="black">{x}, {y}</text>
+		<polygon fill={colors.cell} points={points}></polygon>
+		<text y="40" fill={colors.text}>
+			<tspan x="30" dy="0">{x}, {y}</tspan>
+    		<tspan x="10" dy="20px">{figure}</tspan>
+    	</text>
 	</svg>
 }

@@ -7,9 +7,8 @@ function Board(props) {
 				cell =>
 				<Cell
 					key={cell.x + '_' + cell.y}
-					x={cell.x}
-					y={cell.y}
-					width={90}>
+					{...cell}
+					size={90}>
 				</Cell>)
 		}</div>
 	);

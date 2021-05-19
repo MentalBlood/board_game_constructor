@@ -1,1 +1,1 @@
-"use strict";function Board(e){return React.createElement("div",{className:"board"},e.board.map((e=>React.createElement(Cell,{key:e.x+"_"+e.y,x:e.x,y:e.y,width:90}))))}
+"use strict";function _extends(){return(_extends=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var r=arguments[t];for(var n in r)Object.prototype.hasOwnProperty.call(r,n)&&(e[n]=r[n])}return e}).apply(this,arguments)}function Board(e){return React.createElement("div",{className:"board"},e.board.map((e=>React.createElement(Cell,_extends({key:e.x+"_"+e.y},e,{size:90})))))}
