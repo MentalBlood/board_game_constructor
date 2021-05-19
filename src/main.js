@@ -1,9 +1,5 @@
 'use strict'
 
-function isDict(something) {
-	return something.constructor == Object;
-}
-
 function getAllElementsWithDepth_(dict, depth, destination, keys) {
 	for (const key of Object.keys(dict)) {
 		const element = dict[key];
@@ -37,6 +33,7 @@ class Root extends React.Component {
 
 		this.state = {
 			'board': undefined,
+			'selected_cell': undefined,
 			'config_text': undefined,
 			'config': {
 				'players': ['white', 'black'],
@@ -235,7 +232,6 @@ class Root extends React.Component {
 
 	placeFiguresOnBoard(cell_coords_names, position, board_config) {
 		const result_board = {};
-		console.log('placeFiguresOnBoard', board_config.length)
 		for (const cell of board_config) {
 			this.insertByCoordinates(cell_coords_names, cell, result_board, {});
 		}
@@ -275,10 +271,32 @@ class Root extends React.Component {
 		this.setState(this.compile_(), () => this.forceUpdate());
 	}
 
+	canMove(from_cell, to_cell) {
+		return true;
+	}
+
+	move(from_cell, to_cell) {
+
+	}
+
+	selectCell(cell) {
+		console.log('selectCell', cell);
+		if (this.state.selected_cell) {
+			if (this.canMove(this.state.selected_cell, cell)) {
+				this.move(this.state.selected_cell, cell);
+				this.setState({'selected_cell': undefined});
+			}
+		}
+		this.setState({'selected_cell': cell});
+	}
+
 	render() {
 		const unpacked_board = this.unpackBoard(this.state.config.cell, this.state.board);
 		return (<div className='app'>
-			<Board board={unpacked_board}></Board>
+			<Board
+				board={unpacked_board}
+				selectCell={this.selectCell.bind(this)}
+				selected_cell={this.state.selected_cell}></Board>
 			<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
