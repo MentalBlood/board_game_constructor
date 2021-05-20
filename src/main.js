@@ -297,8 +297,7 @@ class Root extends React.Component {
 		return result;
 	}
 
-	isDivider(cell_coords_names, v, divider, coefficients_available) {
-		console.log('isDivider', v, divider, coefficients_available)
+	isDivider(cell_coords_names, v, divider) {
 		let coefficient = undefined;
 		for (let i = 0; i < cell_coords_names.length; i++) {
 			const name = cell_coords_names[i];
@@ -314,15 +313,15 @@ class Root extends React.Component {
 			else {
 				coefficient = quotient;
 				if (divider.also_reversed) {
-					if ((Math.abs(coefficient) > 1) && !coefficients_available['any'])
+					if ((Math.abs(coefficient) > 1) && !divider.repeat)
 						return false;
 					continue;
 				}
 				if (coefficient > 0)
-					if (!coefficients_available[1] || ((coefficient > 1) && !coefficients_available['any']))
+					if ((coefficient > 1) && !divider.repeat)
 						return false;
 				if (coefficient < 0)
-					if (!coefficients_available[-1] || ((coefficient < -1) && !coefficients_available['any']))
+					if (!divider.also_reversed || ((coefficient < -1) && !divider.repeat))
 						return false;
 			}
 		}
@@ -342,11 +341,8 @@ class Root extends React.Component {
 		
 		const cell_coords_names = this.state.config.cell;
 		const movement = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
-		const coefficients_available = {1: true};
-		if (available_movement_for_color.repeat)
-			coefficients_available['any'] = true;
 		for (const a_m of available_movement_for_color) {
-			if (this.isDivider(cell_coords_names, movement, a_m, coefficients_available)) {
+			if (this.isDivider(cell_coords_names, movement, a_m)) {
 				console.log('can:', a_m, 'divides', movement);
 				return true;
 			}
