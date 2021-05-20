@@ -52,11 +52,16 @@ class Root extends React.Component {
 							'y': -1,
 							'also_reversed': true
 						}],
-						'destination_cell_figure': {
-							'allied': [{
+						'cell_actions': {
+							'destination': [{
 								'action': 'swap',
 								'if': {
-									'figure': 'defensor'
+									'given': {
+										'figure': 'defensor'
+									},
+									'computed': {
+										'is_enemy': false
+									}
 								}
 							}]
 						}
@@ -88,7 +93,17 @@ class Root extends React.Component {
 							'y': -1,
 							'repeat': true,
 							'also_reversed': true
-						}]
+						}],
+						'cell_actions': {
+							'transition': {
+								'allied': [{
+									'action': 'cancel'
+								}],
+								'enemy': [{
+									'action': 'cancel'
+								}]
+							}
+						}
 					},
 					'aggressor': {
 						'movement': [{
@@ -335,7 +350,7 @@ class Root extends React.Component {
 						return false;
 			}
 		}
-		return true;
+		return {'coefficient': coefficient};
 	}
 
 	matchDict(dict, conditions_dict) {
@@ -343,6 +358,28 @@ class Root extends React.Component {
 			if (dict[key] != conditions_dict[key])
 				return false;
 		return true;
+	}
+
+	getActionsForCell(cell, from_cell, figure_info, movement, cell_type) {
+		const actions_by_type = movement.cell_actions || figure_info.cell_actions;
+		if (!actions_by_type)
+			return false;
+		
+		const actions = actions_by_type[cell_type];
+		console.log('actions', actions)
+		if (!actions)
+			return false;
+		
+		const matched_actions_names = [];
+		for (const a of actions) {
+			if (this.matchDict(cell, a['if'].given))
+				matched_actions_names.push(a.action);
+		}
+		if (matched_actions_names.length == 0)
+			return false;
+		if (matched_actions_names.includes('cancel'))
+			return false;
+		return {'actions': matched_actions_names}
 	}
 
 	canMove(from_cell, to_cell) {
@@ -354,34 +391,19 @@ class Root extends React.Component {
 		const figure_info = this.state.config.figures[figure];
 		const figure_color = from_cell.player;
 		const available_movement = figure_info.movement;
-		const available_movement_for_color = isDict(available_movement) ? available_movement[figure_color] : available_movement;
+		const available_movements_for_color = isDict(available_movement) ? available_movement[figure_color] : available_movement;
 		
 		const cell_coords_names = this.state.config.cell;
 		const movement = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
-		for (const a_m of available_movement_for_color) {
-			if (this.isDivider(cell_coords_names, movement, a_m)) {
-				console.log('can:', a_m, 'divides', movement);
-				if (to_cell.figure) {
-					const figure_type = (from_cell.player == to_cell.player) ? 'allied' : 'enemy';
-					const actions_by_figure_type = a_m.destination_cell_figure || figure_info.destination_cell_figure;
-					if (actions_by_figure_type) {
-						const actions = actions_by_figure_type[figure_type];
-						if (actions) {
-							const matched_actions_names = [];
-							for (const a of actions) {
-								if (this.matchDict(to_cell, a['if']))
-									matched_actions_names.push(a.action);
-							}
-							if (matched_actions_names.length == 0)
-								return false;
-							else
-								return {'actions': matched_actions_names}
-						}
-					}
-					else
-						return false;
-				} else
-					return {'actions': []};
+		for (const available_movement of available_movements_for_color) {
+			const coefficient = this.isDivider(cell_coords_names, movement, available_movement)?.coefficient;
+			if (coefficient) {
+				if (to_cell.figure) 
+					return this.getActionsForCell(to_cell, from_cell, figure_info, available_movement, 'destination');
+				for (let step = 1; step != Math.abs(coefficient); step++) {
+
+				}
+				return {'actions': []};
 			}
 		}
 		return false;
