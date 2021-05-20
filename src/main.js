@@ -44,26 +44,17 @@ class Root extends React.Component {
 						'movement': [{
 							'x': 1,
 							'also_reversed': true,
-							'destination_cell_figure': {
-								'allied': 'swap',
-								'enemy': 'take'
-							}
 						}, {
 							'y': 1,
-							'also_reversed': true,
-							'destination_cell_figure': {
-								'allied': 'swap',
-								'enemy': 'take'
-							}
+							'also_reversed': true
 						}, {
 							'x': 1,
 							'y': -1,
-							'also_reversed': true,
-							'destination_cell_figure': {
-								'allied': 'swap',
-								'enemy': 'take'
-							}
-						}]
+							'also_reversed': true
+						}],
+						'destination_cell_figure': {
+							'allied': 'swap'
+						}
 					},
 					'defensor': {
 						'movement': [{
@@ -360,8 +351,9 @@ class Root extends React.Component {
 				console.log('can:', a_m, 'divides', movement);
 				if (to_cell.figure) {
 					const figure_type = (from_cell.player == to_cell.player) ? 'allied' : 'enemy';
-					if (a_m.destination_cell_figure) {
-						const action = a_m.destination_cell_figure[figure_type];
+					const action_by_figure_type = figure_info.destination_cell_figure || a_m.destination_cell_figure;
+					if (action_by_figure_type) {
+						const action = action_by_figure_type[figure_type];
 						if (action)
 							return {'actions': [action]};
 					}
