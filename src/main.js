@@ -230,6 +230,22 @@ class Root extends React.Component {
 		current_level[c] = element_to_insert;
 	}
 
+	getByCoordinates(cell_coords_names, cell, dict) {
+		const coordinates_list = cell_coords_names.map(name => cell[name]);
+		let current_level = dict;
+		for (let i = 0; i < coordinates_list.length - 1; i++) {
+			const c = coordinates_list[i];
+			if (!current_level[c])
+				return undefined;
+			current_level = current_level[c];
+		}
+		const c = coordinates_list[coordinates_list.length - 1];
+		if (current_level[c] !== undefined)
+			return [current_level, c];
+		else
+			return undefined;
+	}
+
 	placeFiguresOnBoard(cell_coords_names, position, board_config) {
 		const result_board = {};
 		for (const cell of board_config) {
@@ -296,6 +312,11 @@ class Root extends React.Component {
 			}
 			else {
 				coefficient = quotient;
+				if (divider.also_reversed) {
+					if ((Math.abs(coefficient) > 1) && !coefficients_available['any'])
+						return false;
+					continue;
+				}
 				if (coefficient > 0)
 					if (!coefficients_available[1] || ((coefficient > 1) && !coefficients_available['any']))
 						return false;
@@ -321,8 +342,6 @@ class Root extends React.Component {
 		const cell_coords_names = this.state.config.cell;
 		const movement = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
 		const coefficients_available = {1: true};
-		if (available_movement_for_color.also_reversed)
-			coefficients_available[-1] = true;
 		if (available_movement_for_color.repeat)
 			coefficients_available['any'] = true;
 		for (const a_m of available_movement_for_color) {
@@ -335,7 +354,15 @@ class Root extends React.Component {
 	}
 
 	move(from_cell, to_cell) {
-
+		this.setState(state => {
+			const from_cell_address = this.getByCoordinates(state.config.cell, from_cell, state.board);
+			const to_cell_address = this.getByCoordinates(state.config.cell, to_cell, state.board);
+			to_cell_address[0][to_cell_address[1]].figure = from_cell.figure;
+			to_cell_address[0][to_cell_address[1]].player = from_cell.player;
+			delete from_cell_address[0][from_cell_address[1]].figure;
+			delete from_cell_address[0][from_cell_address[1]].player;
+			return state;
+		});
 	}
 
 	selectCell(cell) {
