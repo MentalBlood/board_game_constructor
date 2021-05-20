@@ -90,12 +90,12 @@ class Root extends React.Component {
 							'also_reversed': true
 						}, {
 							'x': 1,
-							'y': -1,
+							'y': -2,
 							'repeat': true,
 							'also_reversed': true
 						}, {
-							'x': -1,
-							'y': 1,
+							'x': 2,
+							'y': -1,
 							'repeat': true,
 							'also_reversed': true
 						}]
@@ -146,7 +146,7 @@ class Root extends React.Component {
 							{'x': 0, 'y': 0},
 							{'x': 8, 'y': -4}
 						],
-						'agressor': [
+						'aggressor': [
 							{'x': 2, 'y': -1},
 							{'x': 6, 'y': -3},
 						],
@@ -174,7 +174,7 @@ class Root extends React.Component {
 							{'x': 0, 'y': 6},
 							{'x': 8, 'y': 2}
 						],
-						'agressor': [
+						'aggressor': [
 							{'x': 2, 'y': 5},
 							{'x': 6, 'y': 3},
 						],
@@ -298,6 +298,7 @@ class Root extends React.Component {
 	}
 
 	isDivider(cell_coords_names, v, divider, coefficients_available) {
+		console.log('isDivider', v, divider, coefficients_available)
 		let coefficient = undefined;
 		for (let i = 0; i < cell_coords_names.length; i++) {
 			const name = cell_coords_names[i];
