@@ -53,7 +53,12 @@ class Root extends React.Component {
 							'also_reversed': true
 						}],
 						'destination_cell_figure': {
-							'allied': 'swap'
+							'allied': [{
+								'action': 'swap',
+								'if': {
+									'figure': 'defensor'
+								}
+							}]
 						}
 					},
 					'defensor': {
@@ -333,6 +338,13 @@ class Root extends React.Component {
 		return true;
 	}
 
+	matchDict(dict, conditions_dict) {
+		for (const key in conditions_dict)
+			if (dict[key] != conditions_dict[key])
+				return false;
+		return true;
+	}
+
 	canMove(from_cell, to_cell) {
 		const figure = from_cell.figure;
 		if (!figure)
@@ -351,11 +363,20 @@ class Root extends React.Component {
 				console.log('can:', a_m, 'divides', movement);
 				if (to_cell.figure) {
 					const figure_type = (from_cell.player == to_cell.player) ? 'allied' : 'enemy';
-					const action_by_figure_type = figure_info.destination_cell_figure || a_m.destination_cell_figure;
-					if (action_by_figure_type) {
-						const action = action_by_figure_type[figure_type];
-						if (action)
-							return {'actions': [action]};
+					const actions_by_figure_type = a_m.destination_cell_figure || figure_info.destination_cell_figure;
+					if (actions_by_figure_type) {
+						const actions = actions_by_figure_type[figure_type];
+						if (actions) {
+							const matched_actions_names = [];
+							for (const a of actions) {
+								if (this.matchDict(to_cell, a['if']))
+									matched_actions_names.push(a.action);
+							}
+							if (matched_actions_names.length == 0)
+								return false;
+							else
+								return {'actions': matched_actions_names}
+						}
 					}
 					else
 						return false;
