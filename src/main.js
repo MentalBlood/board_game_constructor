@@ -271,8 +271,67 @@ class Root extends React.Component {
 		this.setState(this.compile_(), () => this.forceUpdate());
 	}
 
-	canMove(from_cell, to_cell) {
+	getCellsDelta(cell_coords_names, a, b) {
+		const result = {};
+		for (name of cell_coords_names) {
+			const d = b[name] - a[name];
+			if (d)
+				result[name] = b[name] - a[name];
+		}
+		return result;
+	}
+
+	isDivider(cell_coords_names, v, divider, coefficients_available) {
+		let coefficient = undefined;
+		for (let i = 0; i < cell_coords_names.length; i++) {
+			const name = cell_coords_names[i];
+			if ((v[name] && !divider[name]) || (!v[name] && divider[name]))
+				return false;
+			if ((v[name] === undefined) || (divider[name] == undefined))
+				continue;
+			const quotient = v[name] / divider[name];
+			if (coefficient) {
+				if (quotient != coefficient)
+					return false;
+			}
+			else {
+				coefficient = quotient;
+				if (coefficient > 0)
+					if (!coefficients_available[1] || ((coefficient > 1) && !coefficients_available['any']))
+						return false;
+				if (coefficient < 0)
+					if (!coefficients_available[-1] || ((coefficient < -1) && !coefficients_available['any']))
+						return false;
+			}
+		}
 		return true;
+	}
+
+	canMove(from_cell, to_cell) {
+		const figure = from_cell.figure;
+		if (!figure)
+			return false;
+		if (isObjectsEqual(from_cell, to_cell))
+			return false;
+		const figure_info = this.state.config.figures[figure];
+		const figure_color = from_cell.player;
+		const available_movement = figure_info.movement;
+		const available_movement_for_color = isDict(available_movement) ? available_movement[figure_color] : available_movement;
+		
+		const cell_coords_names = this.state.config.cell;
+		const movement = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
+		const coefficients_available = {1: true};
+		if (available_movement_for_color.also_reversed)
+			coefficients_available[-1] = true;
+		if (available_movement_for_color.repeat)
+			coefficients_available['any'] = true;
+		for (const a_m of available_movement_for_color) {
+			if (this.isDivider(cell_coords_names, movement, a_m, coefficients_available)) {
+				console.log('can:', a_m, 'divides', movement);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	move(from_cell, to_cell) {
@@ -280,14 +339,14 @@ class Root extends React.Component {
 	}
 
 	selectCell(cell) {
-		console.log('selectCell', cell);
 		if (this.state.selected_cell) {
 			if (this.canMove(this.state.selected_cell, cell)) {
 				this.move(this.state.selected_cell, cell);
-				this.setState({'selected_cell': undefined});
 			}
+			this.setState({'selected_cell': undefined});
 		}
-		this.setState({'selected_cell': cell});
+		else
+			this.setState({'selected_cell': cell});
 	}
 
 	render() {
