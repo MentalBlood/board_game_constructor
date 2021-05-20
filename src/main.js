@@ -43,14 +43,26 @@ class Root extends React.Component {
 					'intellector': {
 						'movement': [{
 							'x': 1,
-							'also_reversed': true
+							'also_reversed': true,
+							'destination_cell_figure': {
+								'allied': 'swap',
+								'enemy': 'take'
+							}
 						}, {
 							'y': 1,
-							'also_reversed': true
+							'also_reversed': true,
+							'destination_cell_figure': {
+								'allied': 'swap',
+								'enemy': 'take'
+							}
 						}, {
 							'x': 1,
 							'y': -1,
-							'also_reversed': true
+							'also_reversed': true,
+							'destination_cell_figure': {
+								'allied': 'swap',
+								'enemy': 'take'
+							}
 						}]
 					},
 					'defensor': {
@@ -346,13 +358,23 @@ class Root extends React.Component {
 		for (const a_m of available_movement_for_color) {
 			if (this.isDivider(cell_coords_names, movement, a_m)) {
 				console.log('can:', a_m, 'divides', movement);
-				return true;
+				if (to_cell.figure) {
+					const figure_type = (from_cell.player == to_cell.player) ? 'allied' : 'enemy';
+					if (a_m.destination_cell_figure) {
+						const action = a_m.destination_cell_figure[figure_type];
+						if (action)
+							return {'actions': [action]};
+					}
+					else
+						return false;
+				} else
+					return {'actions': []};
 			}
 		}
 		return false;
 	}
 
-	move(from_cell, to_cell) {
+	move(from_cell, to_cell, actions) {
 		this.setState(state => {
 			const from_cell_address = this.getByCoordinates(state.config.cell, from_cell, state.board);
 			const to_cell_address = this.getByCoordinates(state.config.cell, to_cell, state.board);
@@ -360,14 +382,22 @@ class Root extends React.Component {
 			to_cell_address[0][to_cell_address[1]].player = from_cell.player;
 			delete from_cell_address[0][from_cell_address[1]].figure;
 			delete from_cell_address[0][from_cell_address[1]].player;
+			for (const a of actions) {
+				if (a == 'take') {}
+				else if (a == 'swap') {
+					from_cell_address[0][from_cell_address[1]].figure = to_cell.figure;
+					from_cell_address[0][from_cell_address[1]].player = to_cell.player;
+				}
+			}
 			return state;
 		});
 	}
 
 	selectCell(cell) {
 		if (this.state.selected_cell) {
-			if (this.canMove(this.state.selected_cell, cell)) {
-				this.move(this.state.selected_cell, cell);
+			const move = this.canMove(this.state.selected_cell, cell);
+			if (move) {
+				this.move(this.state.selected_cell, cell, move.actions);
 			}
 			this.setState({'selected_cell': undefined});
 		}
