@@ -306,6 +306,8 @@ class Root extends React.Component {
 			if ((v[name] === undefined) || (divider[name] == undefined))
 				continue;
 			const quotient = v[name] / divider[name];
+			if (quotient != Math.floor(quotient))
+				return false;
 			if (coefficient) {
 				if (quotient != coefficient)
 					return false;
