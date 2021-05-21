@@ -38,8 +38,8 @@ class Root extends React.Component {
 			'config_text': undefined,
 			'config': {
 				'players': ['white', 'black'],
-				'board': [],
 				'cell': ['x', 'y'],
+				'board': [],
 				'figures': {
 					'intellector': {
 						'movement': [{
@@ -78,7 +78,12 @@ class Root extends React.Component {
 							'x': 1,
 							'y': -1,
 							'also_reversed': true
-						}]
+						}],
+						'cell_actions': {
+							'destination': [{
+								'action': 'take'
+							}]
+						}
 					},
 					'dominator': {
 						'movement': [{
@@ -94,7 +99,12 @@ class Root extends React.Component {
 							'y': -1,
 							'repeat': true,
 							'also_reversed': true
-						}]
+						}],
+						'cell_actions': {
+							'destination': [{
+								'action': 'take'
+							}]
+						}
 					},
 					'aggressor': {
 						'movement': [{
@@ -112,7 +122,12 @@ class Root extends React.Component {
 							'y': -1,
 							'repeat': true,
 							'also_reversed': true
-						}]
+						}],
+						'cell_actions': {
+							'destination': [{
+								'action': 'take'
+							}]
+						}
 					},
 					'liberator': {
 						'movement': [{
@@ -125,25 +140,50 @@ class Root extends React.Component {
 							'x': 2,
 							'y': -2,
 							'also_reversed': true
-						}]
+						}],
+						'cell_actions': {
+							'destination': [{
+								'action': 'take'
+							}]
+						}
 					},
 					'progressor': {
 						'movement': {
 							'white': [{
-								'x': 1
+								'x': 1,
+								'cell_actions': {
+									'destination': [{
+										'action': 'take'
+									}]
+								}
 							}, {
 								'y': 1
 							}, {
 								'x': -1,
-								'y': 1
+								'y': 1,
+								'cell_actions': {
+									'destination': [{
+										'action': 'take'
+									}]
+								}
 							}],
 							'black': [{
-								'x': -1
+								'x': -1,
+								'cell_actions': {
+									'destination': [{
+										'action': 'take'
+									}]
+								}
 							}, {
 								'y': -1
 							}, {
 								'x': 1,
-								'y': -1
+								'y': -1,
+								'cell_actions': {
+									'destination': [{
+										'action': 'take'
+									}]
+								}
 							}]
 						}
 					}
@@ -222,6 +262,10 @@ class Root extends React.Component {
 				this.setByCoordinates(cell_2, cell_1, board);
 			},
 			'move': (from_cell, to_cell, board) => {
+				this.setByCoordinates(to_cell, this.withoutCoordinates(from_cell), board);
+				this.emptyCell(from_cell, board);
+			},
+			'take': (from_cell, to_cell, board) => {
 				this.setByCoordinates(to_cell, this.withoutCoordinates(from_cell), board);
 				this.emptyCell(from_cell, board);
 			}
