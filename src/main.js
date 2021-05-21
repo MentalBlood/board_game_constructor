@@ -38,10 +38,6 @@ class Root extends React.Component {
 			'config_text': undefined,
 			'config': default_config
 		}
-
-		for (let x = 0; x < 9; x++)
-			for (let y = 0 - Math.floor(x / 2); y < 7 - x % 2 - Math.floor(x / 2); y++)
-				this.state.config.board.push({'x': x, 'y': y});
 		
 		this.state.config_text = JSON.stringify(this.state.config);
 		this.state = Object.assign(this.state, this.compile_());
