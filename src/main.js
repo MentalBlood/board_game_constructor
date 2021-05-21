@@ -1,7 +1,8 @@
 'use strict'
 
 function getAllElementsWithDepth_(dict, depth, destination, keys) {
-	for (const key of Object.keys(dict)) {
+	for (const str_key of Object.keys(dict)) {
+		const key = Number.parseInt(str_key, 10);
 		const element = dict[key];
 		const new_keys = keys.concat([key]);
 		if (depth == 0)
@@ -253,7 +254,7 @@ class Root extends React.Component {
 		current_level[c] = element_to_insert;
 	}
 
-	getByCoordinates(cell_coords_names, cell, dict) {
+	getByCoordinates_(cell_coords_names, cell, dict) {
 		const coordinates_list = cell_coords_names.map(name => cell[name]);
 		let current_level = dict;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
@@ -269,6 +270,11 @@ class Root extends React.Component {
 			return undefined;
 	}
 
+	getByCoordinates(cell_coords_names, cell, dict) {
+		const cell_address = this.getByCoordinates_(cell_coords_names, cell, dict);
+		return cell_address ? cell_address[0][cell_address[1]] : undefined;
+	}
+
 	placeFiguresOnBoard(cell_coords_names, position, board_config) {
 		const result_board = {};
 		for (const cell of board_config) {
@@ -277,10 +283,10 @@ class Root extends React.Component {
 		for (const player in position) {
 			for (const figure in position[player]) {
 				for (const coordinates of position[player][figure]) {
-					this.insertByCoordinates(cell_coords_names, coordinates, result_board, {
+					this.insertByCoordinates(cell_coords_names, coordinates, result_board, Object.assign({
 						'player': player,
 						'figure': figure
-					}, false);
+					}, coordinates), false);
 				}
 			}
 		}
@@ -289,7 +295,7 @@ class Root extends React.Component {
 
 	unpackBoard(cell_coords_names, board_with_figures) {
 		const keys_and_elements = getAllElementsWithDepth(this.state.board, cell_coords_names.length - 1);
-		return keys_and_elements.map(k_e => Object.assign({}, k_e.element, dictFromTwoLists(cell_coords_names, k_e.keys)));
+		return keys_and_elements.map(k_e => Object.assign(k_e.element, dictFromTwoLists(cell_coords_names, k_e.keys)));
 	}
 
 	compile_() {
@@ -366,7 +372,6 @@ class Root extends React.Component {
 			return false;
 		
 		const actions = actions_by_type[cell_type];
-		console.log('actions', actions)
 		if (!actions)
 			return false;
 		
@@ -375,34 +380,55 @@ class Root extends React.Component {
 			if (this.matchDict(cell, a['if'].given))
 				matched_actions_names.push(a.action);
 		}
+
 		if (matched_actions_names.length == 0)
 			return false;
 		if (matched_actions_names.includes('cancel'))
 			return false;
+		
 		return {'actions': matched_actions_names}
+	}
+
+	getCellAfterSteps(cell_coords_names, from_cell, move, steps_number) {
+		const result = {};
+		for (const name of cell_coords_names)
+			result[name] = from_cell[name] + move[name] * steps_number;
+		return result;
 	}
 
 	canMove(from_cell, to_cell) {
 		const figure = from_cell.figure;
+		
 		if (!figure)
 			return false;
 		if (isObjectsEqual(from_cell, to_cell))
 			return false;
+		
 		const figure_info = this.state.config.figures[figure];
-		const figure_color = from_cell.player;
-		const available_movement = figure_info.movement;
-		const available_movements_for_color = isDict(available_movement) ? available_movement[figure_color] : available_movement;
+		const available_moves = figure_info.movement;
+		const available_moves_for_color = isDict(available_moves) ? available_moves[from_cell.player] : available_moves;
 		
 		const cell_coords_names = this.state.config.cell;
-		const movement = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
-		for (const available_movement of available_movements_for_color) {
-			const coefficient = this.isDivider(cell_coords_names, movement, available_movement)?.coefficient;
+		const move = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
+		for (const available_move of available_moves_for_color) {
+			const coefficient = this.isDivider(cell_coords_names, move, available_move)?.coefficient;
 			if (coefficient) {
 				if (to_cell.figure) 
-					return this.getActionsForCell(to_cell, from_cell, figure_info, available_movement, 'destination');
-				for (let step = 1; step != Math.abs(coefficient); step++) {
-
+					return this.getActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
+				const actions_for_transition_cells = [];
+				const direction = Math.sign(coefficient);
+				for (let step = direction; step != coefficient; step += direction) {
+					const current_cell_coordinates = this.getCellAfterSteps(cell_coords_names, from_cell, available_move, step);
+					const current_cell = this.getByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
+					if (!current_cell.figure)
+						continue;
+					const new_actions = this.getActionsForCell(current_cell, from_cell, figure_info, available_move, 'transition');
+					if (new_actions === false)
+						return false;
+					actions_for_transition_cells.push(...new_actions);
 				}
+				if (actions_for_transition_cells.length)
+					return {'actions': actions_for_transition_cells};
 				return {'actions': []};
 			}
 		}
@@ -411,8 +437,8 @@ class Root extends React.Component {
 
 	move(from_cell, to_cell, actions) {
 		this.setState(state => {
-			const from_cell_address = this.getByCoordinates(state.config.cell, from_cell, state.board);
-			const to_cell_address = this.getByCoordinates(state.config.cell, to_cell, state.board);
+			const from_cell_address = this.getByCoordinates_(state.config.cell, from_cell, state.board);
+			const to_cell_address = this.getByCoordinates_(state.config.cell, to_cell, state.board);
 			to_cell_address[0][to_cell_address[1]].figure = from_cell.figure;
 			to_cell_address[0][to_cell_address[1]].player = from_cell.player;
 			delete from_cell_address[0][from_cell_address[1]].figure;
@@ -429,6 +455,7 @@ class Root extends React.Component {
 	}
 
 	selectCell(cell) {
+		console.log('selectCell', cell, this.state.board);
 		if (this.state.selected_cell) {
 			const move = this.canMove(this.state.selected_cell, cell);
 			if (move) {
@@ -446,7 +473,8 @@ class Root extends React.Component {
 			<Board
 				board={unpacked_board}
 				selectCell={this.selectCell.bind(this)}
-				selected_cell={this.state.selected_cell}></Board>
+				selected_cell={this.state.selected_cell}
+				cell_coords_names={this.state.config.cell}></Board>
 			<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
