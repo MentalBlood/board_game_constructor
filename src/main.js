@@ -94,17 +94,7 @@ class Root extends React.Component {
 							'y': -1,
 							'repeat': true,
 							'also_reversed': true
-						}],
-						'cell_actions': {
-							'transition': {
-								'allied': [{
-									'action': 'cancel'
-								}],
-								'enemy': [{
-									'action': 'cancel'
-								}]
-							}
-						}
+						}]
 					},
 					'aggressor': {
 						'movement': [{
@@ -127,17 +117,14 @@ class Root extends React.Component {
 					'liberator': {
 						'movement': [{
 							'x': 2,
-							'also_reversed': true,
-							'jump': true
+							'also_reversed': true
 						}, {
 							'y': 2,
-							'also_reversed': true,
-							'jump': true
+							'also_reversed': true
 						}, {
 							'x': 2,
 							'y': -2,
-							'also_reversed': true,
-							'jump': true
+							'also_reversed': true
 						}]
 					},
 					'progressor': {
@@ -444,12 +431,15 @@ class Root extends React.Component {
 
 	getCellAfterSteps(cell_coords_names, from_cell, move, steps_number) {
 		const result = {};
-		for (const name of cell_coords_names)
-			result[name] = from_cell[name] + move[name] * steps_number;
+		for (const name of cell_coords_names) {
+			const move_coordinate = move[name] ? move[name] : 0;
+			result[name] = from_cell[name] + move_coordinate * steps_number;
+		}
 		return result;
 	}
 
 	canMove(from_cell, to_cell) {
+		console.log('canMove', from_cell, to_cell)
 		const figure = from_cell.figure;
 		
 		if (!figure)
@@ -498,7 +488,6 @@ class Root extends React.Component {
 	}
 
 	selectCell(cell) {
-		console.log('selectCell', cell, this.state.board);
 		if (this.state.selected_cell) {
 			const move = this.canMove(this.state.selected_cell, cell);
 			if (move)
