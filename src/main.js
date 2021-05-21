@@ -81,7 +81,12 @@ class Root extends React.Component {
 						}],
 						'cell_actions': {
 							'destination': [{
-								'action': 'take'
+								'action': 'take',
+								'if': {
+									'computed': {
+										'is_enemy': true
+									}
+								}
 							}]
 						}
 					},
@@ -102,7 +107,12 @@ class Root extends React.Component {
 						}],
 						'cell_actions': {
 							'destination': [{
-								'action': 'take'
+								'action': 'take',
+								'if': {
+									'computed': {
+										'is_enemy': true
+									}
+								}
 							}]
 						}
 					},
@@ -125,7 +135,12 @@ class Root extends React.Component {
 						}],
 						'cell_actions': {
 							'destination': [{
-								'action': 'take'
+								'action': 'take',
+								'if': {
+									'computed': {
+										'is_enemy': true
+									}
+								}
 							}]
 						}
 					},
@@ -143,7 +158,12 @@ class Root extends React.Component {
 						}],
 						'cell_actions': {
 							'destination': [{
-								'action': 'take'
+								'action': 'take',
+								'if': {
+									'computed': {
+										'is_enemy': true
+									}
+								}
 							}]
 						}
 					},
@@ -153,7 +173,12 @@ class Root extends React.Component {
 								'x': 1,
 								'cell_actions': {
 									'destination': [{
-										'action': 'take'
+										'action': 'take',
+										'if': {
+											'computed': {
+												'is_enemy': true
+											}
+										}
 									}]
 								}
 							}, {
@@ -163,7 +188,12 @@ class Root extends React.Component {
 								'y': 1,
 								'cell_actions': {
 									'destination': [{
-										'action': 'take'
+										'action': 'take',
+										'if': {
+											'computed': {
+												'is_enemy': true
+											}
+										}
 									}]
 								}
 							}],
@@ -171,7 +201,12 @@ class Root extends React.Component {
 								'x': -1,
 								'cell_actions': {
 									'destination': [{
-										'action': 'take'
+										'action': 'take',
+										'if': {
+											'computed': {
+												'is_enemy': true
+											}
+										}
 									}]
 								}
 							}, {
@@ -181,7 +216,12 @@ class Root extends React.Component {
 								'y': -1,
 								'cell_actions': {
 									'destination': [{
-										'action': 'take'
+										'action': 'take',
+										'if': {
+											'computed': {
+												'is_enemy': true
+											}
+										}
 									}]
 								}
 							}]
