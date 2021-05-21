@@ -5,7 +5,7 @@ function getAllElementsWithDepth_(dict, depth, destination, keys) {
 		const key = Number.parseInt(str_key, 10);
 		const element = dict[key];
 		const new_keys = keys.concat([key]);
-		if (depth == 0)
+		if (depth === 0)
 			destination.push({
 				'keys': new_keys,
 				'element': element
@@ -28,12 +28,20 @@ function dictFromTwoLists(a, b) {
 	return result;
 }
 
+function matchDict(dict, conditions_dict) {
+	for (const key in conditions_dict)
+		if (dict[key] != conditions_dict[key])
+			return false;
+	return true;
+}
+
 class Root extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
 			'board': undefined,
+			'game_state': undefined,
 			'selected_cell': undefined,
 			'config_text': undefined,
 			'config': default_config
@@ -56,9 +64,44 @@ class Root extends React.Component {
 				this.emptyCell(from_cell, board);
 			}
 		};
+
 		this.values_computers = {
 			'is_enemy': (cell, from_cell) => cell.player != from_cell.player
 		};
+
+		this.entities_getters = {
+			'cell': board => this.unpackBoard(board)
+		};
+
+		this.conditions_types = {
+			'exists': entities_list => Boolean(entities_list.length)
+		}
+
+		this.state_data_getters = {
+			'check_win': () => {
+				const current_player = this.getCurrentPlayer();
+				const win_conditions = this.state.config.win_conditions[current_player];
+				for (const c of win_conditions) {
+					const entities = this.entities_getters[c.entity](board);
+					const filtered_entities = entities.filter(e => matchDict(e, c.filter));
+					const result = this.conditions_types[c.type](filtered_entities);
+					return result === c.result;
+				}
+			}
+		};
+	}
+
+	componentDidMount() {
+		this.startGame();
+	}
+
+	startGame() {
+		this.setGameState(this.state.config.initial_game_state);
+	}
+
+	setGameState(game_state) {
+		if (this.state.config.game_states[game_state])
+			this.setState(state => ({'game_state': game_state}), () => console.log('game_state:', this.state.game_state));
 	}
 
 	withoutData(cell) {
@@ -67,6 +110,12 @@ class Root extends React.Component {
 		for (const name of cell_coords_names)
 			result[name] = cell[name];
 		return result;
+	}
+
+	getCurrentPlayer() {
+		const current_state_info = this.getCurrentGameStateInfo();
+		if (current_state_info)
+			return current_state_info.parameters.player;
 	}
 
 	withoutCoordinates(cell) {
@@ -165,7 +214,7 @@ class Root extends React.Component {
 
 	compile() {
 		const new_config = JSON.parse(this.state.config_text);
-		this.setState(this.compile_(), () => this.forceUpdate());
+		this.setState(this.compile_());
 	}
 
 	getCellsDelta(cell_coords_names, a, b) {
@@ -184,7 +233,7 @@ class Root extends React.Component {
 			const name = cell_coords_names[i];
 			if ((v[name] && !divider[name]) || (!v[name] && divider[name]))
 				return false;
-			if ((v[name] === undefined) || (divider[name] == undefined))
+			if ((v[name] === undefined) || (divider[name] === undefined))
 				continue;
 			const quotient = v[name] / divider[name];
 			if (quotient != Math.floor(quotient))
@@ -211,13 +260,6 @@ class Root extends React.Component {
 		return {'coefficient': coefficient};
 	}
 
-	matchDict(dict, conditions_dict) {
-		for (const key in conditions_dict)
-			if (dict[key] != conditions_dict[key])
-				return false;
-		return true;
-	}
-
 	computeValues(values_names, cell, from_cell) {
 		const result = {};
 		for (const name of values_names) {
@@ -240,18 +282,18 @@ class Root extends React.Component {
 		for (const a of actions) {
 			if (a['if']) {
 				if (a['if'].given)
-					if (!this.matchDict(cell, a['if'].given))
+					if (!matchDict(cell, a['if'].given))
 						continue;
 				if (a['if'].computed) {
 					const computed_dict = this.computeValues(Object.keys(a['if'].computed), cell, from_cell);
-					if (!this.matchDict(computed_dict, a['if'].computed))
+					if (!matchDict(computed_dict, a['if'].computed))
 						continue;
 				}
 			}
 			matched_actions_names.push(a.action);
 		}
 
-		if (matched_actions_names.length == 0)
+		if (matched_actions_names.length === 0)
 			return false;
 		if (matched_actions_names.includes('cancel'))
 			return false;
@@ -269,7 +311,6 @@ class Root extends React.Component {
 	}
 
 	canMove(from_cell, to_cell) {
-		console.log('canMove', from_cell, to_cell)
 		const figure = from_cell.figure;
 		
 		if (!figure)
@@ -317,15 +358,38 @@ class Root extends React.Component {
 		});
 	}
 
+	getCurrentGameStateInfo() {
+		return this.state.config.game_states[this.state.game_state];
+	}
+
+	getNextGameState() {
+		const current_state_info = this.getCurrentGameStateInfo();
+		if (typeof(current_state_info.next) === 'string')
+			return current_state_info.next;
+		for (const branch of current_state_info.next) {
+			const data = this.state_data_getters[branch.state];
+			if (matchDict({ 'result': data }, branch['if']))
+				return branch.state;
+		}
+	}
+
 	selectCell(cell) {
 		if (this.state.selected_cell) {
 			const move = this.canMove(this.state.selected_cell, cell);
-			if (move)
+			if (move) {
 				this.makeActions(this.state.selected_cell, cell, move.actions);
+				const next_state = this.getNextGameState();
+				this.setGameState(next_state);
+			}
 			this.setState({'selected_cell': undefined});
 		}
-		else
-			this.setState({'selected_cell': cell});
+		else {
+			const selected_cell_player = cell.player;
+			if (!selected_cell_player)
+				return;
+			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters.player))
+				this.setState({'selected_cell': cell});
+		}
 	}
 
 	render() {

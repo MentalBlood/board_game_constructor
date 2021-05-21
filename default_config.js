@@ -247,7 +247,82 @@ const default_config = {
 				{'x': 8, 'y': 1}
 			]
 		}
-	}
+	},
+	'win_conditions': {
+		'white': [{
+			'entity': 'cell',
+			'filter': {
+				'player': 'black',
+				'figure': 'intellector'
+			},
+			'type': 'exists',
+			'result': false
+		}],
+		'black': [{
+			'entity': 'cell',
+			'filter': {
+				'player': 'white',
+				'figure': 'intellector'
+			},
+			'type': 'exists',
+			'result': false
+		}]
+	},
+	'game_states': {
+		'white_move': {
+			'type': 'move',
+			'parameters': {
+				'player': 'white'
+			},
+			'next': 'check_white_win'
+		},
+		'black_move': {
+			'type': 'move',
+			'parameters': {
+				'player': 'black'
+			},
+			'next': 'check_black_win'
+		},
+		'check_white_win': {
+			'type': 'check_win',
+			'parameters': {
+				'player': 'white'
+			},
+			'next': [{
+				'state': 'black_move',
+				'if': {
+					'result': false
+				}
+			}, {
+				'state': 'white_won',
+				'if': {
+					'result': true
+				}
+			}]
+		},
+		'check_black_win': {
+			'type': 'check_win',
+			'parameters': {
+				'player': 'black'
+			},
+			'next': [{
+				'state': 'white_move',
+				'if': {
+					'result': false
+				}
+			}, {
+				'state': 'black_won',
+				'if': {
+					'result': true
+				}
+			}]
+		}
+	},
+	'initial_game_state': 'white_move',
+	'end_game_states': [
+		'white_won',
+		'black_won'
+	]
 }
 
 for (let x = 0; x < 9; x++)
