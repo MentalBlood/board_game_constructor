@@ -228,6 +228,36 @@ class Root extends React.Component {
 		
 		this.state.config_text = JSON.stringify(this.state.config);
 		this.state = Object.assign(this.state, this.compile_());
+
+		this.actions = {
+			'swap': (cell_1, cell_2, board) => {
+				this.setByCoordinates(cell_1, cell_2, board);
+				this.setByCoordinates(cell_2, cell_1, board);
+			},
+			'move': (from_cell, to_cell, board) => {
+				this.setByCoordinates(to_cell, this.withoutCoordinates(from_cell), board);
+				this.emptyCell(from_cell, board);
+			}
+		};
+		this.values_computers = {
+			'is_enemy': (cell, from_cell) => cell.player != from_cell.player
+		};
+	}
+
+	withoutData(cell) {
+		const cell_coords_names = this.state.config.cell;
+		const result = {};
+		for (const name of cell_coords_names)
+			result[name] = cell[name];
+		return result;
+	}
+
+	withoutCoordinates(cell) {
+		const result = Object.assign({}, cell);
+		const cell_coords_names = this.state.config.cell;
+		for (const name of cell_coords_names)
+			delete result[name];
+		return result;
 	}
 
 	onConfigTextChange(e) {
@@ -235,9 +265,10 @@ class Root extends React.Component {
 		this.setState({'config_text': new_text});
 	}
 
-	insertByCoordinates(cell_coords_names, cell, dict, element_to_insert, create_path=true) {
+	setByCoordinates(cell, element_to_insert, board, create_path=true) {
+		const cell_coords_names = this.state.config.cell;
 		const coordinates_list = cell_coords_names.map(name => cell[name]);
-		let current_level = dict;
+		let current_level = board;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
 			const c = coordinates_list[i];
 			if (!current_level[c]) {
@@ -254,9 +285,13 @@ class Root extends React.Component {
 		current_level[c] = element_to_insert;
 	}
 
-	getByCoordinates_(cell_coords_names, cell, dict) {
+	emptyCell(cell, board) {
+		this.setByCoordinates(cell, this.withoutData(cell), board);
+	}
+
+	getByCoordinates_(cell_coords_names, cell, board) {
 		const coordinates_list = cell_coords_names.map(name => cell[name]);
-		let current_level = dict;
+		let current_level = board;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
 			const c = coordinates_list[i];
 			if (!current_level[c])
@@ -270,23 +305,23 @@ class Root extends React.Component {
 			return undefined;
 	}
 
-	getByCoordinates(cell_coords_names, cell, dict) {
-		const cell_address = this.getByCoordinates_(cell_coords_names, cell, dict);
+	getByCoordinates(cell_coords_names, cell, board) {
+		const cell_address = this.getByCoordinates_(cell_coords_names, cell, board);
 		return cell_address ? cell_address[0][cell_address[1]] : undefined;
 	}
 
 	placeFiguresOnBoard(cell_coords_names, position, board_config) {
 		const result_board = {};
 		for (const cell of board_config) {
-			this.insertByCoordinates(cell_coords_names, cell, result_board, {});
+			this.emptyCell(cell, result_board);
 		}
 		for (const player in position) {
 			for (const figure in position[player]) {
 				for (const coordinates of position[player][figure]) {
-					this.insertByCoordinates(cell_coords_names, coordinates, result_board, Object.assign({
+					this.setByCoordinates(coordinates, {
 						'player': player,
 						'figure': figure
-					}, coordinates), false);
+					}, result_board, false);
 				}
 			}
 		}
@@ -366,6 +401,15 @@ class Root extends React.Component {
 		return true;
 	}
 
+	computeValues(values_names, cell, from_cell) {
+		const result = {};
+		for (const name of values_names) {
+			if (this.values_computers[name])
+				result[name] = this.values_computers[name](cell, from_cell);
+		}
+		return result;
+	}
+
 	getActionsForCell(cell, from_cell, figure_info, movement, cell_type) {
 		const actions_by_type = movement.cell_actions || figure_info.cell_actions;
 		if (!actions_by_type)
@@ -377,8 +421,17 @@ class Root extends React.Component {
 		
 		const matched_actions_names = [];
 		for (const a of actions) {
-			if (this.matchDict(cell, a['if'].given))
-				matched_actions_names.push(a.action);
+			if (a['if']) {
+				if (a['if'].given)
+					if (!this.matchDict(cell, a['if'].given))
+						continue;
+				if (a['if'].computed) {
+					const computed_dict = this.computeValues(Object.keys(a['if'].computed), cell, from_cell);
+					if (!this.matchDict(computed_dict, a['if'].computed))
+						continue;
+				}
+			}
+			matched_actions_names.push(a.action);
 		}
 
 		if (matched_actions_names.length == 0)
@@ -429,27 +482,17 @@ class Root extends React.Component {
 				}
 				if (actions_for_transition_cells.length)
 					return {'actions': actions_for_transition_cells};
-				return {'actions': []};
+				return {'actions': ['move']};
 			}
 		}
 		return false;
 	}
 
-	move(from_cell, to_cell, actions) {
+	makeActions(from_cell, to_cell, actions) {
 		this.setState(state => {
-			const from_cell_address = this.getByCoordinates_(state.config.cell, from_cell, state.board);
-			const to_cell_address = this.getByCoordinates_(state.config.cell, to_cell, state.board);
-			to_cell_address[0][to_cell_address[1]].figure = from_cell.figure;
-			to_cell_address[0][to_cell_address[1]].player = from_cell.player;
-			delete from_cell_address[0][from_cell_address[1]].figure;
-			delete from_cell_address[0][from_cell_address[1]].player;
-			for (const a of actions) {
-				if (a == 'take') {}
-				else if (a == 'swap') {
-					from_cell_address[0][from_cell_address[1]].figure = to_cell.figure;
-					from_cell_address[0][from_cell_address[1]].player = to_cell.player;
-				}
-			}
+			for (const a of actions)
+				if (this.actions[a])
+					this.actions[a](from_cell, to_cell, state.board);
 			return state;
 		});
 	}
@@ -458,9 +501,8 @@ class Root extends React.Component {
 		console.log('selectCell', cell, this.state.board);
 		if (this.state.selected_cell) {
 			const move = this.canMove(this.state.selected_cell, cell);
-			if (move) {
-				this.move(this.state.selected_cell, cell, move.actions);
-			}
+			if (move)
+				this.makeActions(this.state.selected_cell, cell, move.actions);
 			this.setState({'selected_cell': undefined});
 		}
 		else
