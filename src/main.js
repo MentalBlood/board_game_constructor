@@ -70,7 +70,7 @@ class Root extends React.Component {
 		};
 
 		this.entities_getters = {
-			'cell': board => this.composeUnpackedBoard(this.state.config.cell, board)
+			'cell': board => this.composeUnpackedBoard(this.state.config.cell.coordinates_names, board)
 		};
 
 		this.conditions_types = {
@@ -111,7 +111,7 @@ class Root extends React.Component {
 	}
 
 	composeCellWithoutData(cell) {
-		const cell_coords_names = this.state.config.cell;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const result = {};
 		for (const name of cell_coords_names)
 			result[name] = cell[name];
@@ -126,7 +126,7 @@ class Root extends React.Component {
 
 	withoutCoordinates(cell) {
 		const result = Object.assign({}, cell);
-		const cell_coords_names = this.state.config.cell;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
 		for (const name of cell_coords_names)
 			delete result[name];
 		return result;
@@ -138,7 +138,7 @@ class Root extends React.Component {
 	}
 
 	setCellByCoordinates(cell, element_to_insert, board, create_path=true) {
-		const cell_coords_names = this.state.config.cell;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const coordinates_list = cell_coords_names.map(name => cell[name]);
 		let current_level = board;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
@@ -209,9 +209,10 @@ class Root extends React.Component {
 		const new_config = JSON.parse(this.state.config_text);
 		return {
 			'config': new_config,
+			'game_state': new_config.initial_game_state,
 			'position': new_config.initial_position,
 			'board': this.composeBoardWithFigures(
-				new_config.cell,
+				new_config.cell.coordinates_names,
 				new_config.initial_position,
 				new_config.board
 			)
@@ -316,7 +317,7 @@ class Root extends React.Component {
 		return result;
 	}
 
-	isAllowedMove(from_cell, to_cell) {
+	isMovePossible(from_cell, to_cell) {
 		const figure = from_cell.figure;
 		
 		if (!figure)
@@ -328,7 +329,7 @@ class Root extends React.Component {
 		const available_moves = figure_info.movement;
 		const available_moves_for_color = isDict(available_moves) ? available_moves[from_cell.player] : available_moves;
 		
-		const cell_coords_names = this.state.config.cell;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const move = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
 		for (const available_move of available_moves_for_color) {
 			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
@@ -396,7 +397,7 @@ class Root extends React.Component {
 
 	handleSelectCell(cell) {
 		if (this.state.selected_cell) {
-			const move = this.isAllowedMove(this.state.selected_cell, cell);
+			const move = this.isMovePossible(this.state.selected_cell, cell);
 			if (move) {
 				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, move.actions);
 				this.setState(new_state, () => this.setNextGameState());
@@ -413,14 +414,15 @@ class Root extends React.Component {
 	}
 
 	render() {
-		const unpacked_board = this.composeUnpackedBoard(this.state.config.cell, this.state.board);
+		const unpacked_board = this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board);
 		return (<div className='app'>
 			<div className="gameUI">
 				<Board
 					board={unpacked_board}
+					cell_config={this.state.config.cell}
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
-					cell_coords_names={this.state.config.cell}></Board>
+					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
 				<div className="gameState">{this.state.game_state}</div>
 			</div>
 			<div className='config'>

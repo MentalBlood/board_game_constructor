@@ -1,6 +1,34 @@
 const default_config = {
 	'players': ['white', 'black'],
-	'cell': ['x', 'y'],
+	'cell': {
+		'coordinates_names': ['x', 'y'],
+		'geometry': [
+			[0.3,	0.13],
+			[0.225,	0.26],
+			[0.075,	0.26],
+			[0,		0.13],
+			[0.075,	0],
+			[0.225,	0],
+		],
+		'position': {
+			'x': 'x * 0.225 * size',
+			'y': '(y * size + x * size / 2) * 0.26'
+		},
+		'colors': {
+			'white': {
+				'cell': 'white',
+				'text': 'black'
+			},
+			'black': {
+				'cell': 'black',
+				'text': 'white'
+			},
+			undefined: {
+				'cell': 'darkgrey',
+				'text': 'black'
+			}
+		}
+	},
 	'board': [],
 	'figures': {
 		'intellector': {

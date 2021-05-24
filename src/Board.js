@@ -6,12 +6,6 @@ function isDict(something) {
 	return something.constructor == Object;
 }
 
-function convertCellCoordinatesToNumbers(cell_coords_names, cell) {
-	for (const name of cell_coords_names)
-		cell[name] = Number.parseInt(cell[name], 10);
-	return cell;
-}
-
 function isObjectsEqual(object1, object2) {
 	if (!isDict(object1) || !isDict(object2))
 		return false;
@@ -22,7 +16,7 @@ function isObjectsEqual(object1, object2) {
 }
 
 function Board(props) {
-	const {board, handleSelectCell, selected_cell, cell_coords_names} = props;
+	const {cell_config, board, handleSelectCell, selected_cell} = props;
 
 	return (
 		<div className="board">{
@@ -31,6 +25,7 @@ function Board(props) {
 				<Cell
 					key={cell.x + '_' + cell.y}
 					{...cell}
+					cell_config={cell_config}
 					size={300}
 					handleSelectThisCell={() => handleSelectCell(cell)}
 					selected={isObjectsEqual(selected_cell, cell)}>
