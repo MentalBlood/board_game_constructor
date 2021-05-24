@@ -22,7 +22,7 @@ function isObjectsEqual(object1, object2) {
 }
 
 function Board(props) {
-	const {board, selectCell, selected_cell, cell_coords_names} = props;
+	const {board, handleSelectCell, selected_cell, cell_coords_names} = props;
 
 	return (
 		<div className="board">{
@@ -32,7 +32,7 @@ function Board(props) {
 					key={cell.x + '_' + cell.y}
 					{...cell}
 					size={90}
-					selectThisCell={() => selectCell(cell)}
+					handleSelectThisCell={() => handleSelectCell(cell)}
 					selected={isObjectsEqual(selected_cell, cell)}>
 				</Cell>)
 		}</div>

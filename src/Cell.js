@@ -1,7 +1,7 @@
 'use strict';
 
 function Cell(props) {
-	const {x, y, size, figure, player, selected, selectThisCell} = props;
+	const {x, y, size, figure, player, selected, handleSelectThisCell} = props;
 	const colors = {
 		'white': {
 			'cell': 'white',
@@ -33,7 +33,7 @@ function Cell(props) {
 			'top': y * size + x * size / 2 + 'px'
 		}}
 		xmlns="http://www.w3.org/2000/svg" version="1.1"
-		onClick={selectThisCell}>
+		onClick={handleSelectThisCell}>
 		<polygon fill={colors.cell} points={points}></polygon>
 		<text className='unselectable' y="40" fill={colors.text}>
 			<tspan x="30" dy="0">{x}, {y}</tspan>
