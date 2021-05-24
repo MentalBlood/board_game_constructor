@@ -31,7 +31,7 @@ function Board(props) {
 				<Cell
 					key={cell.x + '_' + cell.y}
 					{...cell}
-					size={90}
+					size={300}
 					handleSelectThisCell={() => handleSelectCell(cell)}
 					selected={isObjectsEqual(selected_cell, cell)}>
 				</Cell>)

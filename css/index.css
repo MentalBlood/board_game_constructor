@@ -13,10 +13,22 @@
 	flex-direction: row;
 }
 
-.board {
+.gameUI {
+	display: flex;
+	flex-direction: column;
 	width: 50vw;
 	height: 100vh;
 	background-color: grey;
+}
+
+.board {
+	width: 50vw;
+	height: 80vh;
+}
+
+.gameState {
+	margin: auto;
+	font-size: 5vh;
 }
 
 .cell {
@@ -32,10 +44,9 @@
 }
 
 .config {
-	margin-left: 5vw;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-around;
+	margin: auto;
 }
 
 .configText {

@@ -107,7 +107,7 @@ class Root extends React.Component {
 
 	setGameState(game_state) {
 		if (this.state.config.game_states[game_state])
-			this.setState(state => ({'game_state': game_state}), () => console.log('setGameState:', this.state.game_state));
+			this.setState(state => ({'game_state': game_state}));
 	}
 
 	composeCellWithoutData(cell) {
@@ -415,11 +415,14 @@ class Root extends React.Component {
 	render() {
 		const unpacked_board = this.composeUnpackedBoard(this.state.config.cell, this.state.board);
 		return (<div className='app'>
-			<Board
-				board={unpacked_board}
-				handleSelectCell={this.handleSelectCell.bind(this)}
-				selected_cell={this.state.selected_cell}
-				cell_coords_names={this.state.config.cell}></Board>
+			<div className="gameUI">
+				<Board
+					board={unpacked_board}
+					handleSelectCell={this.handleSelectCell.bind(this)}
+					selected_cell={this.state.selected_cell}
+					cell_coords_names={this.state.config.cell}></Board>
+				<div className="gameState">{this.state.game_state}</div>
+			</div>
 			<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
