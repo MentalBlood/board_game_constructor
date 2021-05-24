@@ -70,7 +70,7 @@ class Root extends React.Component {
 		};
 
 		this.entities_getters = {
-			'cell': board => this.unpackBoard(board)
+			'cell': board => this.unpackBoard(this.state.config.cell, board)
 		};
 
 		this.conditions_types = {
@@ -78,7 +78,7 @@ class Root extends React.Component {
 		}
 
 		this.state_data_getters = {
-			'check_win': () => {
+			'check_win': board => {
 				const current_player = this.getCurrentPlayer();
 				const win_conditions = this.state.config.win_conditions[current_player];
 				for (const c of win_conditions) {
@@ -89,6 +89,12 @@ class Root extends React.Component {
 				}
 			}
 		};
+
+		this.game_state_passiveness_by_type = {
+			'move': 'active',
+			'check_win': 'passive',
+			'end': 'active'
+		}
 	}
 
 	componentDidMount() {
@@ -101,7 +107,7 @@ class Root extends React.Component {
 
 	setGameState(game_state) {
 		if (this.state.config.game_states[game_state])
-			this.setState(state => ({'game_state': game_state}), () => console.log('game_state:', this.state.game_state));
+			this.setState(state => ({'game_state': game_state}), () => console.log('setGameState:', this.state.game_state));
 	}
 
 	withoutData(cell) {
@@ -349,37 +355,51 @@ class Root extends React.Component {
 		return false;
 	}
 
-	makeActions(from_cell, to_cell, actions) {
-		this.setState(state => {
-			for (const a of actions)
-				if (this.actions[a])
-					this.actions[a](from_cell, to_cell, state.board);
-			return state;
-		});
+	getStateAfterActions(state, from_cell, to_cell, actions) {
+		for (const a of actions)
+			if (this.actions[a])
+				this.actions[a](from_cell, to_cell, state.board);
+		return state;
 	}
 
 	getCurrentGameStateInfo() {
 		return this.state.config.game_states[this.state.game_state];
 	}
 
-	getNextGameState() {
-		const current_state_info = this.getCurrentGameStateInfo();
+	getGameStateInfo(game_state) {
+		return this.state.config.game_states[game_state];
+	}
+
+	getNextGameState(current_state) {
+		const current_state_info = this.getGameStateInfo(current_state);
 		if (typeof(current_state_info.next) === 'string')
 			return current_state_info.next;
+		const data = this.state_data_getters[current_state_info.type](this.state.board);
 		for (const branch of current_state_info.next) {
-			const data = this.state_data_getters[branch.state];
 			if (matchDict({ 'result': data }, branch['if']))
 				return branch.state;
 		}
+	}
+
+	setNextGameState() {
+		const current_state = this.state.game_state;
+		let next_state = this.getNextGameState(current_state);
+		while (true) {
+			const info = this.getGameStateInfo(next_state);
+			const type = info.type;
+			if (this.game_state_passiveness_by_type[type] != 'passive')
+				break;
+			next_state = this.getNextGameState(next_state);
+		}
+		this.setGameState(next_state);
 	}
 
 	selectCell(cell) {
 		if (this.state.selected_cell) {
 			const move = this.canMove(this.state.selected_cell, cell);
 			if (move) {
-				this.makeActions(this.state.selected_cell, cell, move.actions);
-				const next_state = this.getNextGameState();
-				this.setGameState(next_state);
+				const new_state = this.getStateAfterActions(this.state, this.state.selected_cell, cell, move.actions);
+				this.setState(new_state, () => this.setNextGameState());
 			}
 			this.setState({'selected_cell': undefined});
 		}
@@ -387,7 +407,7 @@ class Root extends React.Component {
 			const selected_cell_player = cell.player;
 			if (!selected_cell_player)
 				return;
-			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters.player))
+			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo()?.parameters?.player))
 				this.setState({'selected_cell': cell});
 		}
 	}

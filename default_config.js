@@ -316,13 +316,15 @@ const default_config = {
 					'result': true
 				}
 			}]
+		},
+		'white_won': {
+			'type': 'end'
+		},
+		'black_won': {
+			'type': 'end'
 		}
 	},
-	'initial_game_state': 'white_move',
-	'end_game_states': [
-		'white_won',
-		'black_won'
-	]
+	'initial_game_state': 'white_move'
 }
 
 for (let x = 0; x < 9; x++)
