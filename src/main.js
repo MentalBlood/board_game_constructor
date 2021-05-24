@@ -52,16 +52,18 @@ class Root extends React.Component {
 
 		this.actions = {
 			'swap': (cell_1, cell_2, board) => {
-				this.setCellByCoordinates(cell_1, cell_2, board);
-				this.setCellByCoordinates(cell_2, cell_1, board);
+				this.setCellByCoordinates(cell_1.coordinates, Object.assign({}, cell_2), board);
+				this.setCellByCoordinates(cell_2.coordinates, Object.assign({}, cell_1), board);
 			},
 			'move': (from_cell, to_cell, board) => {
-				this.setCellByCoordinates(to_cell, this.withoutCoordinates(from_cell), board);
-				this.setCellEmpty(from_cell, board);
+				const from_cell_coordinates_temp = from_cell.coordinates;
+				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
+				this.setCellEmpty(from_cell_coordinates_temp, board);
 			},
 			'take': (from_cell, to_cell, board) => {
-				this.setCellByCoordinates(to_cell, this.withoutCoordinates(from_cell), board);
-				this.setCellEmpty(from_cell, board);
+				const from_cell_coordinates_temp = from_cell.coordinates;
+				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
+				this.setCellEmpty(from_cell_coordinates_temp, board);
 			}
 		};
 
@@ -126,9 +128,7 @@ class Root extends React.Component {
 
 	withoutCoordinates(cell) {
 		const result = Object.assign({}, cell);
-		const cell_coords_names = this.state.config.cell.coordinates_names;
-		for (const name of cell_coords_names)
-			delete result[name];
+		delete result.coordinates;
 		return result;
 	}
 
@@ -137,9 +137,9 @@ class Root extends React.Component {
 		this.setState({'config_text': new_text});
 	}
 
-	setCellByCoordinates(cell, element_to_insert, board, create_path=true) {
+	setCellByCoordinates(coordinates, element_to_insert, board, create_path=true) {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
-		const coordinates_list = cell_coords_names.map(name => cell[name]);
+		const coordinates_list = cell_coords_names.map(name => coordinates[name]);
 		let current_level = board;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
 			const c = coordinates_list[i];
@@ -154,11 +154,14 @@ class Root extends React.Component {
 		const c = coordinates_list[coordinates_list.length - 1];
 		if (!current_level[c] && !create_path)
 			return;
-		current_level[c] = element_to_insert;
+		if (current_level[c]?.coordinates)
+			current_level[c] = Object.assign({}, element_to_insert, {coordinates: current_level[c].coordinates});
+		else
+			current_level[c] = Object.assign({}, element_to_insert);
 	}
 
 	setCellEmpty(coordinates, board) {
-		this.setCellByCoordinates(coordinates, this.composeCellWithoutData(coordinates), board);
+		this.setCellByCoordinates(coordinates, {'coordinates': coordinates}, board);
 	}
 
 	getCellByCoordinates_(cell_coords_names, coordinates, board) {
@@ -184,13 +187,14 @@ class Root extends React.Component {
 
 	composeBoardWithFigures(cell_coords_names, position, board_config) {
 		const result_board = {};
-		for (const cell of board_config) {
-			this.setCellEmpty(cell, result_board);
+		for (const cell_coordinates of board_config) {
+			this.setCellEmpty(cell_coordinates, result_board);
 		}
 		for (const player in position) {
 			for (const figure in position[player]) {
 				for (const coordinates of position[player][figure]) {
 					this.setCellByCoordinates(coordinates, {
+						'coordinates': coordinates,
 						'player': player,
 						'figure': figure
 					}, result_board, false);
@@ -202,7 +206,7 @@ class Root extends React.Component {
 
 	composeUnpackedBoard(cell_coords_names, board_with_figures) {
 		const keys_and_elements = getAllElementsWithDepth(this.state.board, cell_coords_names.length - 1);
-		return keys_and_elements.map(k_e => Object.assign(k_e.element, dictFromTwoLists(cell_coords_names, k_e.keys)));
+		return keys_and_elements.map(k_e => k_e.element);
 	}
 
 	compile_() {
@@ -224,9 +228,9 @@ class Root extends React.Component {
 		this.setState(this.compile_());
 	}
 
-	getCellsDelta(cell_coords_names, a, b) {
+	getCoordinatesDelta(a, b) {
 		const result = {};
-		for (name of cell_coords_names) {
+		for (name of Object.keys(a)) {
 			const d = b[name] - a[name];
 			if (d)
 				result[name] = b[name] - a[name];
@@ -234,10 +238,9 @@ class Root extends React.Component {
 		return result;
 	}
 
-	isVectorDividedByAnother(cell_coords_names, v, divider) {
+	isVectorDividedByAnother(v, divider) {
 		let coefficient = undefined;
-		for (let i = 0; i < cell_coords_names.length; i++) {
-			const name = cell_coords_names[i];
+		for (const name of Object.keys(v)) {
 			if ((v[name] && !divider[name]) || (!v[name] && divider[name]))
 				return false;
 			if ((v[name] === undefined) || (divider[name] === undefined))
@@ -330,16 +333,16 @@ class Root extends React.Component {
 		const available_moves_for_color = isDict(available_moves) ? available_moves[from_cell.player] : available_moves;
 		
 		const cell_coords_names = this.state.config.cell.coordinates_names;
-		const move = this.getCellsDelta(cell_coords_names, from_cell, to_cell);
+		const move = this.getCoordinatesDelta(from_cell.coordinates, to_cell.coordinates);
 		for (const available_move of available_moves_for_color) {
-			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
+			const coefficient = this.isVectorDividedByAnother(move, available_move)?.coefficient;
 			if (coefficient) {
 				if (to_cell.figure) 
 					return this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
 				const actions_for_transition_cells = [];
 				const direction = Math.sign(coefficient);
 				for (let step = direction; step != coefficient; step += direction) {
-					const current_cell_coordinates = this.composeCellAfterSteps(cell_coords_names, from_cell, available_move, step);
+					const current_cell_coordinates = this.composeCellAfterSteps(cell_coords_names, from_cell.coordinates, available_move, step);
 					const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
 					if (!current_cell.figure)
 						continue;

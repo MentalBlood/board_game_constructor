@@ -17,13 +17,14 @@ function isObjectsEqual(object1, object2) {
 
 function Board(props) {
 	const {cell_config, board, handleSelectCell, selected_cell} = props;
+	// console.log('Board', board.filter(cell => isObjectsEqual(cell.coordinates, {'x': 4, 'y': 0})));
 
 	return (
 		<div className="board">{
 			board.map(
 				cell =>
 				<Cell
-					key={cell.x + '_' + cell.y}
+					key={Object.values(cell.coordinates).join('_')}
 					{...cell}
 					cell_config={cell_config}
 					size={300}
