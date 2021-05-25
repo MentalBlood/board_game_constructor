@@ -40,8 +40,16 @@ const config = {
 				'also_reversed': true
 			}],
 			'cell_actions': {
+				'destination': [{
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
+						}
+					}
+				}],
 				'transition': [{
-					'action': 'take',
+					'actions': ['take'],
 					'if': {
 						'computed': {
 							'is_enemy': true
@@ -54,12 +62,12 @@ const config = {
 	'initial_position': {
 		'white': {
 			'checker': [
-				{'x': 3, 'y': 0}
+				{'x': 3, 'y': 2}
 			]
 		},
 		'black': {
 			'checker': [
-				{'x': 3, 'y': 7}
+				{'x': 3, 'y': 4}
 			]
 		}
 	},

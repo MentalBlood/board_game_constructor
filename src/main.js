@@ -237,13 +237,11 @@ class Root extends React.Component {
 		return result;
 	}
 
-	isVectorDividedByAnother(v, divider) {
+	isVectorDividedByAnother(cell_coords_names, v, divider) {
 		let coefficient = undefined;
-		for (const name of Object.keys(v)) {
-			if ((v[name] && !divider[name]) || (!v[name] && divider[name]))
+		for (const name of cell_coords_names) {
+			if (!v[name])
 				return false;
-			if ((v[name] === undefined) || (divider[name] === undefined))
-				continue;
 			const quotient = v[name] / divider[name];
 			if (quotient != Math.floor(quotient))
 				return false;
@@ -253,17 +251,10 @@ class Root extends React.Component {
 			}
 			else {
 				coefficient = quotient;
-				if (divider.also_reversed) {
-					if ((Math.abs(coefficient) > 1) && !divider.repeat)
-						return false;
-					continue;
-				}
-				if (coefficient > 0)
-					if ((coefficient > 1) && !divider.repeat)
-						return false;
-				if (coefficient < 0)
-					if (!divider.also_reversed || ((coefficient < -1) && !divider.repeat))
-						return false;
+				if (!divider.also_reversed && coefficient < 0)
+					return false;
+				if (!divider.repeat && (Math.abs(coefficient) > 1))
+					return false;
 			}
 		}
 		return {'coefficient': coefficient};
@@ -335,7 +326,7 @@ class Root extends React.Component {
 		const actions = [];
 
 		for (const available_move of available_moves_for_color) {
-			const coefficient = this.isVectorDividedByAnother(move, available_move)?.coefficient;
+			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
 			if (coefficient) {
 				const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
 				if (new_actions.filter(a => a.actions.includes('cancel')).length)
