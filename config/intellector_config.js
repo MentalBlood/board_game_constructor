@@ -54,6 +54,13 @@ const config = {
 							'is_enemy': false
 						}
 					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
+						}
+					}
 				}]
 			}
 		},
@@ -75,6 +82,13 @@ const config = {
 					'if': {
 						'computed': {
 							'is_enemy': true
+						}
+					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
 						}
 					}
 				}]
@@ -103,12 +117,26 @@ const config = {
 							'is_enemy': true
 						}
 					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
+						}
+					}
 				}],
 				'transition': [{
 					'actions': ['take'],
 					'if': {
 						'computed': {
 							'is_enemy': true
+						}
+					}
+				}, {
+					'actions': ['cancel'],
+					'if': {
+						'computed': {
+							'is_enemy': false
 						}
 					}
 				}]
@@ -139,6 +167,13 @@ const config = {
 							'is_enemy': true
 						}
 					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
+						}
+					}
 				}]
 			}
 		},
@@ -160,6 +195,13 @@ const config = {
 					'if': {
 						'computed': {
 							'is_enemy': true
+						}
+					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
 						}
 					}
 				}]
@@ -190,6 +232,13 @@ const config = {
 					'if': {
 						'computed': {
 							'is_enemy': true
+						}
+					}
+				}, {
+					'actions': ['move'],
+					'if': {
+						'computed': {
+							'is_figure': false
 						}
 					}
 				}]

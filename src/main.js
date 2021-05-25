@@ -66,7 +66,8 @@ class Root extends React.Component {
 		};
 
 		this.values_computers = {
-			'is_enemy': (cell, from_cell) => cell.player != from_cell.player
+			'is_enemy': (cell, from_cell) => (cell.player !== undefined) && (cell.player != from_cell.player),
+			'is_figure': (cell, from_cell) => cell.player !== undefined
 		};
 
 		this.entities_getters = {
@@ -270,10 +271,9 @@ class Root extends React.Component {
 
 	composeComputedValues(values_names, cell, from_cell) {
 		const result = {};
-		for (const name of values_names) {
+		for (const name of values_names)
 			if (this.values_computers[name])
 				result[name] = this.values_computers[name](cell, from_cell);
-		}
 		return result;
 	}
 
@@ -296,8 +296,6 @@ class Root extends React.Component {
 					const computed_dict = this.composeComputedValues(Object.keys(a['if'].computed), cell, from_cell);
 					if (!matchDict(computed_dict, a['if'].computed))
 						continue;
-					if (a.actions.includes('cancel'))
-						return [];
 				}
 			}
 			matched_actions.push({
@@ -306,7 +304,6 @@ class Root extends React.Component {
 				'actions': a.actions
 			});
 		}
-		
 		return matched_actions;
 	}
 
@@ -320,12 +317,6 @@ class Root extends React.Component {
 	}
 
 	composeActionsForMove(from_cell, to_cell) {
-		const default_actions = [{
-			'from_cell': from_cell,
-			'target_cell': to_cell,
-			'actions': ['move']
-		}];
-
 		const figure = from_cell.figure;
 		if (!figure)
 			return [];
@@ -346,12 +337,13 @@ class Root extends React.Component {
 		for (const available_move of available_moves_for_color) {
 			const coefficient = this.isVectorDividedByAnother(move, available_move)?.coefficient;
 			if (coefficient) {
-				if (to_cell.figure) {
-					const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
-					actions.push.apply(actions, ...new_actions);
-				}
+				const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
+				if (new_actions.filter(a => a.actions.includes('cancel')).length)
+					return [];
+				actions.push.apply(actions, new_actions);
+
 				const actions_for_transition_cells = [];
-				const direction = Math.sign(coefficient);
+				const direction = Math.sign(coefficient)
 				for (let step = direction; step != coefficient; step += direction) {
 					const current_cell_coordinates = this.composeCellAfterSteps(cell_coords_names, from_cell.coordinates, available_move, step);
 					const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
@@ -360,12 +352,12 @@ class Root extends React.Component {
 					const new_actions = this.composeActionsForCell(current_cell, from_cell, figure_info, available_move, 'transition');
 					actions_for_transition_cells.push(...new_actions);
 				}
-				if (!actions.length && actions_for_transition_cells.length)
-					return actions_for_transition_cells.concat(default_actions);
+				if (actions_for_transition_cells.filter(a => a.actions.includes('cancel')).length)
+					return [];
 				return actions.concat(actions_for_transition_cells);
 			}
 		}
-		return [];
+		return actions;
 	}
 
 	composeStateAfterActions(state, from_cell, to_cell, actions_info) {
@@ -412,7 +404,6 @@ class Root extends React.Component {
 	handleSelectCell(cell) {
 		if (this.state.selected_cell) {
 			const actions_for_move = this.composeActionsForMove(this.state.selected_cell, cell);
-			console.log('actions_for_move', actions_for_move)
 			if (actions_for_move.length > 0) {
 				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, actions_for_move);
 				this.setState(new_state, () => this.setNextGameState());
