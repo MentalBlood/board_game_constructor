@@ -153,6 +153,8 @@ class Root extends React.Component {
 		const c = coordinates_list[coordinates_list.length - 1];
 		if (!current_level[c] && !create_path)
 			return;
+		if (typeof(element_to_insert) == 'function')
+			element_to_insert = element_to_insert(current_level[c]);
 		if (current_level[c]?.coordinates)
 			current_level[c] = Object.assign({}, element_to_insert, {coordinates: current_level[c].coordinates});
 		else
@@ -194,6 +196,7 @@ class Root extends React.Component {
 				for (const coordinates of position[player][figure]) {
 					this.setCellByCoordinates(coordinates, {
 						'coordinates': coordinates,
+						'moves_made': 0,
 						'player': player,
 						'figure': figure
 					}, result_board, false);
@@ -284,8 +287,11 @@ class Root extends React.Component {
 		const matched_actions = [];
 		for (const a of actions) {
 			if (a['if']) {
-				if (a['if'].given)
-					if (!matchDict(cell, a['if'].given))
+				if (a['if'].self)
+					if (!matchDict(from_cell, a['if'].self))
+						continue;
+				if (a['if'].target)
+					if (!matchDict(cell, a['if'].target))
 						continue;
 				if (a['if'].computed) {
 					const computed_dict = this.composeComputedValues(Object.keys(a['if'].computed), cell, from_cell);
@@ -331,10 +337,10 @@ class Root extends React.Component {
 		for (const available_move of available_moves_for_color) {
 			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
 			if (coefficient) {
-				const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
-				if (new_actions.filter(a => a.actions.includes('cancel')).length)
+				const destination_cell_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
+				if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
 					return [];
-				actions.push.apply(actions, new_actions);
+				actions.push.apply(actions, destination_cell_actions);
 
 				const actions_for_transition_cells = [];
 				const direction = Math.sign(coefficient)
@@ -355,6 +361,9 @@ class Root extends React.Component {
 	}
 
 	composeStateAfterActions(state, from_cell, to_cell, actions_info) {
+		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
+			'moves_made': c.moves_made + 1
+		}), state.board, false);
 		for (const info of actions_info) {
 			for (const a of info.actions)
 			if (this.actions[a])

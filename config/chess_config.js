@@ -66,6 +66,29 @@ const config = {
 		'pawn': {
 			'movement': {
 				'white': [{
+					'y': 2,
+					'cell_actions': {
+						'destination': [{
+							'actions': ['move'],
+							'if': {
+								'self': {
+									'moves_made': 0
+								},
+								'computed': {
+									'is_figure': false
+								}
+							}
+						}],
+						'transition': [{
+							'actions': ['cancel'],
+							'if': {
+								'computed': {
+									'is_figure': true
+								}
+							}
+						}]
+					}
+				}, {
 					'y': 1,
 					'cell_actions': {
 						'destination': [{
@@ -105,6 +128,29 @@ const config = {
 					}
 				}],
 				'black': [{
+					'y': -2,
+					'cell_actions': {
+						'destination': [{
+							'actions': ['move'],
+							'if': {
+								'self': {
+									'moves_made': 0
+								},
+								'computed': {
+									'is_figure': false
+								}
+							}
+						}],
+						'transition': [{
+							'actions': ['cancel'],
+							'if': {
+								'computed': {
+									'is_figure': true
+								}
+							}
+						}]
+					}
+				}, {
 					'y': -1,
 					'cell_actions': {
 						'destination': [{

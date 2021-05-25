@@ -12,7 +12,6 @@ function computeCoordinate(expression, coordinates, size) {
 	const values = Object.values(coordinates);
 	const variables_defining = Object.keys(coordinates).map(name => `const ${name} = coordinates.${name};`).join('\n');
 	const result = eval(`${variables_defining};\n${expression}`);
-	// console.log('result', result);
 	return result;
 }
 

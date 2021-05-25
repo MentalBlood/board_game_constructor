@@ -47,7 +47,7 @@ const config = {
 				'destination': [{
 					'actions': ['swap'],
 					'if': {
-						'given': {
+						'target': {
 							'figure': 'defensor'
 						},
 						'computed': {
