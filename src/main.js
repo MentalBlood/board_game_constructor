@@ -341,12 +341,14 @@ class Root extends React.Component {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const move = this.getCoordinatesDelta(from_cell.coordinates, to_cell.coordinates);
 
+		const actions = [];
+
 		for (const available_move of available_moves_for_color) {
 			const coefficient = this.isVectorDividedByAnother(move, available_move)?.coefficient;
 			if (coefficient) {
-				if (to_cell.figure)  {
+				if (to_cell.figure) {
 					const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
-					return new_actions;
+					actions.push.apply(actions, ...new_actions);
 				}
 				const actions_for_transition_cells = [];
 				const direction = Math.sign(coefficient);
@@ -358,9 +360,9 @@ class Root extends React.Component {
 					const new_actions = this.composeActionsForCell(current_cell, from_cell, figure_info, available_move, 'transition');
 					actions_for_transition_cells.push(...new_actions);
 				}
-				if (actions_for_transition_cells.length)
+				if (!actions.length && actions_for_transition_cells.length)
 					return actions_for_transition_cells.concat(default_actions);
-				return default_actions;
+				return actions.concat(actions_for_transition_cells);
 			}
 		}
 		return [];
@@ -410,6 +412,7 @@ class Root extends React.Component {
 	handleSelectCell(cell) {
 		if (this.state.selected_cell) {
 			const actions_for_move = this.composeActionsForMove(this.state.selected_cell, cell);
+			console.log('actions_for_move', actions_for_move)
 			if (actions_for_move.length > 0) {
 				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, actions_for_move);
 				this.setState(new_state, () => this.setNextGameState());

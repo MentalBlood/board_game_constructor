@@ -53,59 +53,13 @@ const config = {
 	},
 	'initial_position': {
 		'white': {
-			'intellector': [
-				{'x': 4, 'y': -2}
-			],
-			'dominator': [
-				{'x': 0, 'y': 0},
-				{'x': 8, 'y': -4}
-			],
-			'aggressor': [
-				{'x': 2, 'y': -1},
-				{'x': 6, 'y': -3},
-			],
-			'defensor': [
-				{'x': 3, 'y': -1},
-				{'x': 5, 'y': -2}
-			],
-			'liberator': [
-				{'x': 1, 'y': 0},
-				{'x': 7, 'y': -3}
-			],
-			'progressor': [
-				{'x': 0, 'y': 1},
-				{'x': 2, 'y': 0},
-				{'x': 4, 'y': -1},
-				{'x': 6, 'y': -2},
-				{'x': 8, 'y': -3}
+			'checker': [
+				{'x': 3, 'y': 0}
 			]
 		},
 		'black': {
-			'intellector': [
-				{'x': 4, 'y': 4}
-			],
-			'dominator': [
-				{'x': 0, 'y': 6},
-				{'x': 8, 'y': 2}
-			],
-			'aggressor': [
-				{'x': 2, 'y': 5},
-				{'x': 6, 'y': 3},
-			],
-			'defensor': [
-				{'x': 3, 'y': 4},
-				{'x': 5, 'y': 3}
-			],
-			'liberator': [
-				{'x': 1, 'y': 5},
-				{'x': 7, 'y': 2}
-			],
-			'progressor': [
-				{'x': 0, 'y': 5},
-				{'x': 2, 'y': 4},
-				{'x': 4, 'y': 3},
-				{'x': 6, 'y': 2},
-				{'x': 8, 'y': 1}
+			'checker': [
+				{'x': 3, 'y': 7}
 			]
 		}
 	},
@@ -114,7 +68,7 @@ const config = {
 			'entity': 'cell',
 			'filter': {
 				'player': 'black',
-				'figure': 'intellector'
+				'figure': 'checker'
 			},
 			'type': 'exists',
 			'result': false
@@ -123,7 +77,7 @@ const config = {
 			'entity': 'cell',
 			'filter': {
 				'player': 'white',
-				'figure': 'intellector'
+				'figure': 'checker'
 			},
 			'type': 'exists',
 			'result': false
