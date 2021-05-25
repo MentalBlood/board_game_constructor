@@ -33,9 +33,9 @@ function Cell(props) {
 		xmlns="http://www.w3.org/2000/svg" version="1.1"
 		onClick={handleSelectThisCell}>
 		{composeCellPolygon(cell_config, size, player)}
-		<text className='unselectable' y={size / 10} fill={cell_config.colors[player].text}>
-			<tspan x={size / 10} dy="0">{Object.values(coordinates).join(', ')}</tspan>
-    		<tspan x={size / 10 / 3} dy={size / 10 / 3 * 2}>{figure}</tspan>
+		<text style={{fontSize: height / 5 + 'px'}} className='unselectable' y={height / 5 * 2} fill={cell_config.colors[player].text}>
+			<tspan x={width / 3}>{Object.values(coordinates).join(', ')}</tspan>
+    		<tspan x={width / 8} dy={height / 5 * 2}>{figure}</tspan>
     	</text>
 	</svg>
 }

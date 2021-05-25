@@ -17,7 +17,6 @@ function isObjectsEqual(object1, object2) {
 
 function Board(props) {
 	const {cell_config, board, handleSelectCell, selected_cell} = props;
-	// console.log('Board', board.filter(cell => isObjectsEqual(cell.coordinates, {'x': 4, 'y': 0})));
 
 	return (
 		<div className="board">{
@@ -27,7 +26,7 @@ function Board(props) {
 					key={Object.values(cell.coordinates).join('_')}
 					{...cell}
 					cell_config={cell_config}
-					size={300}
+					size={80}
 					handleSelectThisCell={() => handleSelectCell(cell)}
 					selected={isObjectsEqual(selected_cell, cell)}>
 				</Cell>)

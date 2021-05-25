@@ -1,18 +1,18 @@
-const default_config = {
+const config = {
 	'players': ['white', 'black'],
 	'cell': {
 		'coordinates_names': ['x', 'y'],
 		'geometry': [
-			[0.3,	0.13],
-			[0.225,	0.26],
-			[0.075,	0.26],
-			[0,		0.13],
-			[0.075,	0],
+			[0.9,	0.39],
+			[0.675,	0.78],
+			[0.225,	0.78],
+			[0,		0.39],
 			[0.225,	0],
+			[0.675,	0],
 		],
 		'position': {
-			'x': 'x * 0.225 * size',
-			'y': '(y * size + x * size / 2) * 0.26'
+			'x': 'x * 0.675 * size',
+			'y': '(y * size + x * size / 2) * 0.78'
 		},
 		'colors': {
 			'white': {
@@ -45,7 +45,7 @@ const default_config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'action': 'swap',
+					'actions': ['swap'],
 					'if': {
 						'given': {
 							'figure': 'defensor'
@@ -71,7 +71,7 @@ const default_config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'action': 'take',
+					'actions': ['take', 'move'],
 					'if': {
 						'computed': {
 							'is_enemy': true
@@ -97,7 +97,7 @@ const default_config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'action': 'take',
+					'actions': ['take', 'move'],
 					'if': {
 						'computed': {
 							'is_enemy': true
@@ -125,7 +125,7 @@ const default_config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'action': 'take',
+					'actions': ['take', 'move'],
 					'if': {
 						'computed': {
 							'is_enemy': true
@@ -148,7 +148,7 @@ const default_config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'action': 'take',
+					'actions': ['take', 'move'],
 					'if': {
 						'computed': {
 							'is_enemy': true
@@ -160,59 +160,29 @@ const default_config = {
 		'progressor': {
 			'movement': {
 				'white': [{
-					'x': 1,
-					'cell_actions': {
-						'destination': [{
-							'action': 'take',
-							'if': {
-								'computed': {
-									'is_enemy': true
-								}
-							}
-						}]
-					}
+					'x': 1
 				}, {
 					'y': 1
 				}, {
 					'x': -1,
-					'y': 1,
-					'cell_actions': {
-						'destination': [{
-							'action': 'take',
-							'if': {
-								'computed': {
-									'is_enemy': true
-								}
-							}
-						}]
-					}
+					'y': 1
 				}],
 				'black': [{
-					'x': -1,
-					'cell_actions': {
-						'destination': [{
-							'action': 'take',
-							'if': {
-								'computed': {
-									'is_enemy': true
-								}
-							}
-						}]
-					}
+					'x': -1
 				}, {
 					'y': -1
 				}, {
 					'x': 1,
-					'y': -1,
-					'cell_actions': {
-						'destination': [{
-							'action': 'take',
-							'if': {
-								'computed': {
-									'is_enemy': true
-								}
-							}
-						}]
+					'y': -1
+				}]
+			},
+			'cell_actions': {
+				'destination': [{
+					'actions': ['take', 'move'],
+					'if': {
+						'computed': {
+							'is_enemy': true
+						}
 					}
 				}]
 			}
@@ -357,4 +327,4 @@ const default_config = {
 
 for (let x = 0; x < 9; x++)
 	for (let y = 0 - Math.floor(x / 2); y < 7 - x % 2 - Math.floor(x / 2); y++)
-		default_config.board.push({'x': x, 'y': y});
+		config.board.push({'x': x, 'y': y});

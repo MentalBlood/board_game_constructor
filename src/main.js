@@ -44,7 +44,7 @@ class Root extends React.Component {
 			'game_state': undefined,
 			'selected_cell': undefined,
 			'config_text': undefined,
-			'config': default_config
+			'config': config
 		}
 		
 		this.state.config_text = JSON.stringify(this.state.config);
@@ -61,9 +61,7 @@ class Root extends React.Component {
 				this.setCellEmpty(from_cell_coordinates_temp, board);
 			},
 			'take': (from_cell, to_cell, board) => {
-				const from_cell_coordinates_temp = from_cell.coordinates;
-				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
-				this.setCellEmpty(from_cell_coordinates_temp, board);
+				this.setCellEmpty(to_cell.coordinates, board);
 			}
 		};
 
@@ -282,13 +280,13 @@ class Root extends React.Component {
 	composeActionsForCell(cell, from_cell, figure_info, movement, cell_type) {
 		const actions_by_type = movement.cell_actions || figure_info.cell_actions;
 		if (!actions_by_type)
-			return false;
+			return [];
 		
 		const actions = actions_by_type[cell_type];
 		if (!actions)
-			return false;
+			return [];
 		
-		const matched_actions_names = [];
+		const matched_actions = [];
 		for (const a of actions) {
 			if (a['if']) {
 				if (a['if'].given)
@@ -298,17 +296,18 @@ class Root extends React.Component {
 					const computed_dict = this.composeComputedValues(Object.keys(a['if'].computed), cell, from_cell);
 					if (!matchDict(computed_dict, a['if'].computed))
 						continue;
+					if (a.actions.includes('cancel'))
+						return [];
 				}
 			}
-			matched_actions_names.push(a.action);
+			matched_actions.push({
+				'target_cell': cell,
+				'from_cell': from_cell,
+				'actions': a.actions
+			});
 		}
-
-		if (matched_actions_names.length === 0)
-			return false;
-		if (matched_actions_names.includes('cancel'))
-			return false;
 		
-		return {'actions': matched_actions_names}
+		return matched_actions;
 	}
 
 	composeCellAfterSteps(cell_coords_names, from_cell, move, steps_number) {
@@ -320,13 +319,20 @@ class Root extends React.Component {
 		return result;
 	}
 
-	isMovePossible(from_cell, to_cell) {
+	composeActionsForMove(from_cell, to_cell) {
+		const default_actions = [{
+			'from_cell': from_cell,
+			'target_cell': to_cell,
+			'actions': ['move']
+		}];
+
 		const figure = from_cell.figure;
-		
 		if (!figure)
-			return false;
-		if (isObjectsEqual(from_cell, to_cell))
-			return false;
+			return [];
+
+		if (isObjectsEqual(from_cell, to_cell)) {
+			return [];
+		}
 		
 		const figure_info = this.state.config.figures[figure];
 		const available_moves = figure_info.movement;
@@ -334,11 +340,14 @@ class Root extends React.Component {
 		
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const move = this.getCoordinatesDelta(from_cell.coordinates, to_cell.coordinates);
+
 		for (const available_move of available_moves_for_color) {
 			const coefficient = this.isVectorDividedByAnother(move, available_move)?.coefficient;
 			if (coefficient) {
-				if (to_cell.figure) 
-					return this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
+				if (to_cell.figure)  {
+					const new_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
+					return new_actions;
+				}
 				const actions_for_transition_cells = [];
 				const direction = Math.sign(coefficient);
 				for (let step = direction; step != coefficient; step += direction) {
@@ -347,22 +356,22 @@ class Root extends React.Component {
 					if (!current_cell.figure)
 						continue;
 					const new_actions = this.composeActionsForCell(current_cell, from_cell, figure_info, available_move, 'transition');
-					if (new_actions === false)
-						return false;
 					actions_for_transition_cells.push(...new_actions);
 				}
 				if (actions_for_transition_cells.length)
-					return {'actions': actions_for_transition_cells};
-				return {'actions': ['move']};
+					return actions_for_transition_cells;
+				return default_actions;
 			}
 		}
-		return false;
+		return [];
 	}
 
-	composeStateAfterActions(state, from_cell, to_cell, actions) {
-		for (const a of actions)
+	composeStateAfterActions(state, from_cell, to_cell, actions_info) {
+		for (const info of actions_info) {
+			for (const a of info.actions)
 			if (this.actions[a])
-				this.actions[a](from_cell, to_cell, state.board);
+				this.actions[a](info.from_cell, info.target_cell, state.board);
+		}
 		return state;
 	}
 
@@ -400,9 +409,9 @@ class Root extends React.Component {
 
 	handleSelectCell(cell) {
 		if (this.state.selected_cell) {
-			const move = this.isMovePossible(this.state.selected_cell, cell);
-			if (move) {
-				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, move.actions);
+			const actions_for_move = this.composeActionsForMove(this.state.selected_cell, cell);
+			if (actions_for_move.length > 0) {
+				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, actions_for_move);
 				this.setState(new_state, () => this.setNextGameState());
 			}
 			this.setState({'selected_cell': undefined});
@@ -426,13 +435,13 @@ class Root extends React.Component {
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
-				<div className="gameState">{this.state.game_state}</div>
+				<div className="gameState unselectable">{this.state.game_state}</div>
 			</div>
 			<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
-				<button className='compileButton'
+				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
 			</div>
 		</div>);
