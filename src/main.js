@@ -108,7 +108,7 @@ class Root extends React.Component {
 
 	setGameState(game_state) {
 		if (this.state.config.game_states[game_state])
-			this.setState(state => ({'game_state': game_state}));
+			this.setState(state => ({'game_state': game_state}), () => console.log('setGameState', this.state.game_state));
 	}
 
 	composeCellWithoutData(cell) {
@@ -240,8 +240,12 @@ class Root extends React.Component {
 	isVectorDividedByAnother(cell_coords_names, v, divider) {
 		let coefficient = undefined;
 		for (const name of cell_coords_names) {
-			if (!v[name])
-				return false;
+			if (!v[name]) {
+				if (divider[name])
+					return false;
+				else
+					continue;
+			}
 			const quotient = v[name] / divider[name];
 			if (quotient != Math.floor(quotient))
 				return false;
@@ -312,9 +316,8 @@ class Root extends React.Component {
 		if (!figure)
 			return [];
 
-		if (isObjectsEqual(from_cell, to_cell)) {
+		if (isObjectsEqual(from_cell, to_cell))
 			return [];
-		}
 		
 		const figure_info = this.state.config.figures[figure];
 		const available_moves = figure_info.movement;
@@ -422,13 +425,13 @@ class Root extends React.Component {
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
 				<div className="gameState unselectable">{this.state.game_state}</div>
 			</div>
-			<div className='config'>
+			{/*<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
 				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
-			</div>
+			</div>*/}
 		</div>);
 	}
 }

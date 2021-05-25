@@ -33,11 +33,13 @@ const config = {
 			'movement': [{
 				'x': 1,
 				'y': 1,
-				'also_reversed': true
+				'also_reversed': true,
+				'repeat': true
 			}, {
 				'x': 1,
 				'y': -1,
-				'also_reversed': true
+				'also_reversed': true,
+				'repeat': true
 			}],
 			'cell_actions': {
 				'destination': [{
@@ -53,6 +55,13 @@ const config = {
 					'if': {
 						'computed': {
 							'is_enemy': true
+						}
+					}
+				}, {
+					'actions': ['cancel'],
+					'if': {
+						'computed': {
+							'distance': 
 						}
 					}
 				}]
