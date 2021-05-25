@@ -103,6 +103,14 @@ const config = {
 							'is_enemy': true
 						}
 					}
+				}],
+				'transition': [{
+					'actions': ['take'],
+					'if': {
+						'computed': {
+							'is_enemy': true
+						}
+					}
 				}]
 			}
 		},

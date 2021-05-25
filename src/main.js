@@ -359,7 +359,7 @@ class Root extends React.Component {
 					actions_for_transition_cells.push(...new_actions);
 				}
 				if (actions_for_transition_cells.length)
-					return actions_for_transition_cells;
+					return actions_for_transition_cells.concat(default_actions);
 				return default_actions;
 			}
 		}
