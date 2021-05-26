@@ -230,16 +230,6 @@ class Root extends React.Component {
 		this.setState(this.compile_());
 	}
 
-	getCoordinatesDelta(a, b) {
-		const result = {};
-		for (name of Object.keys(a)) {
-			const d = b[name] - a[name];
-			if (d)
-				result[name] = b[name] - a[name];
-		}
-		return result;
-	}
-
 	isVectorDividedByAnother(cell_coords_names, v, divider) {
 		let coefficient = undefined;
 		for (const name of cell_coords_names) {
@@ -275,21 +265,18 @@ class Root extends React.Component {
 		return result;
 	}
 
-	composeActionsForCell(cell, from_cell, figure_info, movement, cell_type) {
-		const actions_by_type = movement.cell_actions || figure_info.cell_actions;
-		if (!actions_by_type)
-			return [];
-		
-		const actions = actions_by_type[cell_type];
+	composeActionsForCell(actions, cell, from_cell) {
 		if (!actions)
 			return [];
-		
+
 		const matched_actions = [];
 		for (const a of actions) {
 			if (a['if']) {
-				if (a['if'].self)
+				if (a['if'].self) {
+					console.log('self', JSON.stringify(from_cell), JSON.stringify(a['if'].self))
 					if (!matchDict(from_cell, a['if'].self))
 						continue;
+				}
 				if (a['if'].target)
 					if (!matchDict(cell, a['if'].target))
 						continue;
@@ -308,13 +295,150 @@ class Root extends React.Component {
 		return matched_actions;
 	}
 
-	composeCellAfterSteps(cell_coords_names, from_cell, move, steps_number) {
+	composeCellAfterSteps(cell_coords_names, from_cell_coordinates, coordinates_delta, steps_number) {
 		const result = {};
 		for (const name of cell_coords_names) {
-			const move_coordinate = move[name] ? move[name] : 0;
-			result[name] = from_cell[name] + move_coordinate * steps_number;
+			const delta = coordinates_delta[name] || 0;
+			result[name] = from_cell_coordinates[name] + delta * steps_number;
 		}
 		return result;
+	}
+
+	composeCoordinatesDelta(cell_coords_names, a, b) {
+		const result = {};
+		for (const name of cell_coords_names)
+			result[name] = (b[name] || 0) - (a[name] || 0);
+		return result;
+	}
+
+	composeActionsForAvailableMove(coordinates_delta, cell_actions, from_cell, to_cell, coefficient) {
+		const figure = from_cell.figure;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
+		const figure_info = this.state.config.figures[figure];
+
+		const actions = [];
+
+		const destination_cell_actions = this.composeActionsForCell(cell_actions['destination'], to_cell, from_cell);
+		if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
+			return [];
+		actions.push.apply(actions, destination_cell_actions);
+
+		const actions_for_transition_cells = [];
+		const direction = Math.sign(coefficient)
+		for (let step = direction; step != coefficient; step += direction) {
+			const current_cell_coordinates = this.composeCellAfterSteps(
+				cell_coords_names,
+				from_cell.coordinates,
+				coordinates_delta,
+				step);
+			const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
+			if (!current_cell?.figure)
+				continue;
+			const new_actions = this.composeActionsForCell(cell_actions['transition'], current_cell, from_cell);
+			actions_for_transition_cells.push(...new_actions);
+		}
+		if (actions_for_transition_cells.filter(a => a.actions.includes('cancel')).length)
+			return [];
+		return actions.concat(actions_for_transition_cells);
+	}
+
+	composeActionsForSimpleMove(from_cell, to_cell) {
+		const figure = from_cell.figure;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
+		const figure_info = this.state.config.figures[figure];
+
+		const move = this.composeCoordinatesDelta(cell_coords_names, from_cell.coordinates, to_cell.coordinates);
+
+		const available_moves = figure_info.movement;
+		const available_moves_for_color = isDict(available_moves) ? available_moves[from_cell.player] : available_moves;
+		for (const available_move of available_moves_for_color) {
+			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
+			if (!coefficient)
+				continue;
+			const cell_actions = available_move.cell_actions || figure_info.cell_actions;
+			const actions = this.composeActionsForAvailableMove(available_move, cell_actions, from_cell, to_cell, coefficient);
+			return actions;
+		}
+
+		return [];
+	}
+
+	composeActionsForComplexMove(from_cell, to_cell) {
+		const figure = from_cell.figure;
+		const cell_coords_names = this.state.config.cell.coordinates_names;
+
+		const move = this.composeCoordinatesDelta(cell_coords_names, from_cell.coordinates, to_cell.coordinates);
+		const complex_moves_with_figure = this.state.config.complex_movement.filter(e => e[figure]);
+
+		const figure_position_absolute = from_cell.coordinates;
+
+		for (const complex_move of complex_moves_with_figure) {
+			let is_complex_move_fits = true;
+			const actions = [];
+			const figure_position_relative = complex_move[figure].relative_position || {};
+			const shift = this.composeCoordinatesDelta(cell_coords_names, figure_position_absolute, figure_position_relative);
+			
+			const complex_move_figures = Object.keys(complex_move).filter(k => 
+				(this.state.config.figures[k])
+			);
+
+			for (const current_figure of complex_move_figures) {
+				const current_figure_info = complex_move[current_figure];
+				const coordinates_delta = current_figure_info.coordinates_delta;
+
+				let coefficient = undefined;
+				if (current_figure !== figure)
+					coefficient = 1;
+				else {
+					coefficient = this.isVectorDividedByAnother(cell_coords_names, move, coordinates_delta)?.coefficient;
+					if (!coefficient) {
+						is_complex_move_fits = false;
+						break;
+					}
+				}
+
+				const current_figure_position_relative = current_figure_info.relative_position || {};
+				const current_figure_position_absolute = this.composeCoordinatesDelta(
+					cell_coords_names,
+					shift,
+					current_figure_position_relative);
+				
+				const current_figure_from_cell = this.getCellByCoordinates(
+					cell_coords_names, current_figure_position_absolute, this.state.board);
+				if (current_figure_from_cell?.figure !== current_figure) {
+					is_complex_move_fits = false;
+					break;
+				}
+
+				const current_figure_to_cell_coordinates = this.composeCellAfterSteps(
+					cell_coords_names, current_figure_from_cell.coordinates, coordinates_delta, 1);
+				const current_figure_to_cell = this.getCellByCoordinates(
+					cell_coords_names, current_figure_to_cell_coordinates, this.state.board);
+				
+				const cell_actions = current_figure_info.cell_actions || complex_move.cell_actions;
+				const new_actions = this.composeActionsForAvailableMove(
+					coordinates_delta, cell_actions, current_figure_from_cell, current_figure_to_cell, coefficient);
+				
+				const destination_cell_actions_number = cell_actions['destination']?.length || 0;
+				const transition_cell_actions_number = cell_actions['transition']?.length || 0;
+				if ((!new_actions) || 
+					(new_actions.length < destination_cell_actions_number + transition_cell_actions_number)) {
+					is_complex_move_fits = false;
+					break;
+				}
+				
+				if (new_actions.filter(a => a.actions.includes('cancel')).length) {
+					is_complex_move_fits = false;
+					break;
+				}
+				
+				actions.push.apply(actions, new_actions);
+			}
+			if (is_complex_move_fits) {
+				return actions;
+			}
+		}
+		return [];
 	}
 
 	composeActionsForMove(from_cell, to_cell) {
@@ -324,46 +448,20 @@ class Root extends React.Component {
 
 		if (isObjectsEqual(from_cell, to_cell))
 			return [];
-		
-		const figure_info = this.state.config.figures[figure];
-		const available_moves = figure_info.movement;
-		const available_moves_for_color = isDict(available_moves) ? available_moves[from_cell.player] : available_moves;
-		
-		const cell_coords_names = this.state.config.cell.coordinates_names;
-		const move = this.getCoordinatesDelta(from_cell.coordinates, to_cell.coordinates);
 
-		const actions = [];
+		const simple_actions = this.composeActionsForSimpleMove(from_cell, to_cell);
+		if (simple_actions.length)
+			return simple_actions;
 
-		for (const available_move of available_moves_for_color) {
-			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
-			if (coefficient) {
-				const destination_cell_actions = this.composeActionsForCell(to_cell, from_cell, figure_info, available_move, 'destination');
-				if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
-					return [];
-				actions.push.apply(actions, destination_cell_actions);
-
-				const actions_for_transition_cells = [];
-				const direction = Math.sign(coefficient)
-				for (let step = direction; step != coefficient; step += direction) {
-					const current_cell_coordinates = this.composeCellAfterSteps(cell_coords_names, from_cell.coordinates, available_move, step);
-					const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
-					if (!current_cell.figure)
-						continue;
-					const new_actions = this.composeActionsForCell(current_cell, from_cell, figure_info, available_move, 'transition');
-					actions_for_transition_cells.push(...new_actions);
-				}
-				if (actions_for_transition_cells.filter(a => a.actions.includes('cancel')).length)
-					return [];
-				return actions.concat(actions_for_transition_cells);
-			}
-		}
-		return actions;
+		const complex_actions = this.composeActionsForComplexMove(from_cell, to_cell);
+		return complex_actions;
 	}
 
-	composeStateAfterActions(state, from_cell, to_cell, actions_info) {
+	composeStateAfterActions(state, from_cell, actions_info) {
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
 		}), state.board, false);
+		console.log('king cell', state.board[4][0])
 		for (const info of actions_info) {
 			for (const a of info.actions)
 			if (this.actions[a])
@@ -405,10 +503,11 @@ class Root extends React.Component {
 	}
 
 	handleSelectCell(cell) {
-		if (this.state.selected_cell) {
-			const actions_for_move = this.composeActionsForMove(this.state.selected_cell, cell);
+		const from_cell = this.state.selected_cell;
+		if (from_cell) {
+			const actions_for_move = this.composeActionsForMove(from_cell, cell);
 			if (actions_for_move.length > 0) {
-				const new_state = this.composeStateAfterActions(this.state, this.state.selected_cell, cell, actions_for_move);
+				const new_state = this.composeStateAfterActions(this.state, from_cell, actions_for_move);
 				this.setState(new_state, () => this.setNextGameState());
 			}
 			this.setState({'selected_cell': undefined});

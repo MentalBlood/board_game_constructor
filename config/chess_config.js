@@ -348,6 +348,39 @@ const config = {
 			}
 		}
 	},
+	'complex_movement': [{
+		'king': {
+			'relative_position': {
+				'x': 0,
+				'y': 0
+			},
+			'coordinates_delta': {
+				'x': -2
+			}
+		},
+		'rook': {
+			'relative_position': {
+				'x': -3,
+				'y': 0
+			},
+			'coordinates_delta': {
+				'x': 2
+			}
+		},
+		'cell_actions': {
+			'destination': [{
+				'actions': ['move'],
+				'if': {
+					'self': {
+						'moves_made': 0
+					},
+					'computed': {
+						'is_figure': false
+					}
+				}
+			}]
+		}
+	}],
 	'initial_position': {
 		'white': {
 			'king': [
@@ -367,7 +400,6 @@ const config = {
 				{'x': 7, 'y': 1}
 			],
 			'bishop': [
-				{'x': 2, 'y': 0},
 				{'x': 5, 'y': 0}
 			],
 			'rook': [
@@ -375,7 +407,6 @@ const config = {
 				{'x': 7, 'y': 0}
 			],
 			'knight': [
-				{'x': 1, 'y': 0},
 				{'x': 6, 'y': 0}
 			]
 		},
