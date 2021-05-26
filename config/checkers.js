@@ -43,7 +43,12 @@ const config = {
 			}],
 			'cell_actions': {
 				'destination': [{
-					'actions': ['move'],
+					'actions': [{
+						'action': 'replace',
+						'parameters': {
+							'new_figure': 'king'
+						}
+					}, 'move'],
 					'if': {
 						'computed': {
 							'is_figure': false
@@ -62,6 +67,42 @@ const config = {
 					'if': {
 						'computed': {
 							'is_enemy': false
+						}
+					}
+				}]
+			}
+		},
+		'king': {
+			'movement': [{
+				'x': 1,
+				'y': 1,
+				'also_reversed': true,
+				'repeat': true
+			}, {
+				'x': 1,
+				'y': -1,
+				'also_reversed': true,
+				'repeat': true
+			}],
+			'cell_actions': {
+				'destination': [{
+					'actions': [{
+						'action': 'replace',
+						'parameters': {
+							'new_figure': 'king'
+						}
+					}, 'move'],
+					'if': {
+						'computed': {
+							'is_figure': false
+						}
+					}
+				}],
+				'transition': [{
+					'actions': ['take'],
+					'if': {
+						'computed': {
+							'is_enemy': true
 						}
 					}
 				}]

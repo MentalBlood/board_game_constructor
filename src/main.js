@@ -62,6 +62,9 @@ class Root extends React.Component {
 			},
 			'take': ({from_cell, to_cell, board}) => {
 				this.setCellEmpty(to_cell.coordinates, board);
+			},
+			'replace': ({from_cell, board, parameters}) => {
+				this.setCellByCoordinates(from_cell.coordinates, Object.assign(from_cell, {'figure': parameters.new_figure}), board);
 			}
 		};
 
@@ -463,14 +466,21 @@ class Root extends React.Component {
 			'moves_made': c.moves_made + 1
 		}), state.board, false);
 		for (const info of actions_info) {
-			for (const a of info.actions)
-			if (this.actions[a])
-				this.actions[a]({
-					'from_cell': info.from_cell,
-					'to_cell': info.target_cell, 
-					'parameters': info.parameters, 
-					'board': state.board
-				});
+			for (const a of info.actions) {
+				let name, parameters;
+				if (isDict(a)) {
+					name = a.action;
+					parameters = a.parameters;
+				} else
+					name = a;
+				if (this.actions[name])
+					this.actions[name]({
+						'from_cell': info.from_cell,
+						'to_cell': info.target_cell, 
+						'parameters': parameters, 
+						'board': state.board
+					});
+			}
 		}
 		return state;
 	}
