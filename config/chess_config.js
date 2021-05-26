@@ -350,18 +350,13 @@ const config = {
 	},
 	'complex_movement': [{
 		'king': {
-			'relative_position': {
-				'x': 0,
-				'y': 0
-			},
 			'coordinates_delta': {
 				'x': -2
 			}
 		},
 		'rook': {
 			'relative_position': {
-				'x': -3,
-				'y': 0
+				'x': -3
 			},
 			'coordinates_delta': {
 				'x': 2
