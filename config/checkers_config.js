@@ -61,7 +61,7 @@ const config = {
 					'actions': ['cancel'],
 					'if': {
 						'computed': {
-							'distance': 
+							'is_enemy': false
 						}
 					}
 				}]
@@ -71,7 +71,7 @@ const config = {
 	'initial_position': {
 		'white': {
 			'checker': [
-				{'x': 3, 'y': 2}
+				{'x': 4, 'y': 3}
 			]
 		},
 		'black': {

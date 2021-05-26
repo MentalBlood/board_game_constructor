@@ -331,8 +331,8 @@ class Root extends React.Component {
 				coordinates_delta,
 				step);
 			const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
-			if (!current_cell?.figure)
-				continue;
+			// if (!current_cell?.figure)
+			// 	continue;
 			const new_actions = this.composeActionsForCell(cell_actions['transition'], current_cell, from_cell);
 			actions_for_transition_cells.push(...new_actions);
 		}
@@ -452,6 +452,8 @@ class Root extends React.Component {
 		if (simple_actions.length)
 			return simple_actions;
 
+		if (!this.state.config.complex_movement)
+			return [];
 		const complex_actions = this.composeActionsForComplexMove(from_cell, to_cell);
 		return complex_actions;
 	}
