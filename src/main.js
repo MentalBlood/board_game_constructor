@@ -273,7 +273,6 @@ class Root extends React.Component {
 		for (const a of actions) {
 			if (a['if']) {
 				if (a['if'].self) {
-					console.log('self', JSON.stringify(from_cell), JSON.stringify(a['if'].self))
 					if (!matchDict(from_cell, a['if'].self))
 						continue;
 				}
@@ -461,7 +460,6 @@ class Root extends React.Component {
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
 		}), state.board, false);
-		console.log('king cell', state.board[4][0])
 		for (const info of actions_info) {
 			for (const a of info.actions)
 			if (this.actions[a])

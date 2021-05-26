@@ -380,6 +380,38 @@ const config = {
 				}
 			}]
 		}
+	}, {
+		'king': {
+			'relative_position': {
+				'x': 0,
+				'y': 0
+			},
+			'coordinates_delta': {
+				'x': 2
+			}
+		},
+		'rook': {
+			'relative_position': {
+				'x': 4,
+				'y': 0
+			},
+			'coordinates_delta': {
+				'x': -3
+			}
+		},
+		'cell_actions': {
+			'destination': [{
+				'actions': ['move'],
+				'if': {
+					'self': {
+						'moves_made': 0
+					},
+					'computed': {
+						'is_figure': false
+					}
+				}
+			}]
+		}
 	}],
 	'initial_position': {
 		'white': {
@@ -387,7 +419,6 @@ const config = {
 				{'x': 3, 'y': 0}
 			],
 			'queen': [
-				{'x': 4, 'y': 0}
 			],
 			'pawn': [
 				{'x': 0, 'y': 1},
@@ -400,14 +431,12 @@ const config = {
 				{'x': 7, 'y': 1}
 			],
 			'bishop': [
-				{'x': 5, 'y': 0}
 			],
 			'rook': [
 				{'x': 0, 'y': 0},
 				{'x': 7, 'y': 0}
 			],
 			'knight': [
-				{'x': 6, 'y': 0}
 			]
 		},
 		'black': {
