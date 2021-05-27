@@ -562,7 +562,7 @@ class Root extends React.Component {
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
-				<div className="gameState unselectable">{this.state.game_state}</div>
+				<div className="gameState unselectable">{this.state.game_state.replace('_', ' ')}</div>
 			</div>
 			<div className='config'>
 				<textarea className='configText'
