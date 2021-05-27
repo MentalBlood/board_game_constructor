@@ -599,4 +599,9 @@ class Root extends React.Component {
 }
 
 const rootElement = document.getElementById('root');
-ReactDOM.render(React.createElement(Root), rootElement);
+const game_name = 'checkers';
+let config = undefined;
+fetch(`config/${game_name}/main.json`)
+	.then(response => response.json())
+	.then(data => config = data)
+	.then(() => ReactDOM.render(React.createElement(Root), rootElement));
