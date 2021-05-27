@@ -103,6 +103,11 @@ class Root extends React.Component {
 
 	componentDidMount() {
 		this.startGame();
+        window.addEventListener('resize', this.handleResize.bind(this));
+	}
+
+	handleResize() {
+		this.forceUpdate();
 	}
 
 	startGame() {
@@ -548,13 +553,13 @@ class Root extends React.Component {
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
 				<div className="gameState unselectable">{this.state.game_state}</div>
 			</div>
-			{/*<div className='config'>
+			<div className='config'>
 				<textarea className='configText'
 					value={JSON.stringify(this.state.config, null, '\t')}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
 				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
-			</div>*/}
+			</div>
 		</div>);
 	}
 }

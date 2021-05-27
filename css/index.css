@@ -20,14 +20,9 @@
 	height: 100vh;
 }
 
-.board {
-	width: 50vw;
-	height: 80vh;
-}
-
 .gameState {
-	margin: auto;
-	font-size: 5vh;
+	margin: auto 1vmin;
+	font-size: 5vmin;
 }
 
 .cell {

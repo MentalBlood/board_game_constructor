@@ -11,8 +11,8 @@ const config = {
 			[0.675,	0],
 		],
 		'position': {
-			'x': 'x * 0.675 * size',
-			'y': '(y * size + x * size / 2) * 0.78'
+			'x': 'x * 0.675',
+			'y': '(y + x / 2) * 0.78'
 		},
 		'colors': {
 			'white': {

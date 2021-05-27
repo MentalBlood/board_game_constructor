@@ -21,21 +21,19 @@ function computeGeometry(cell_config, coordinates) {
 }
 
 function composeSizedPoints(points, size) {
-	return points.map(point => [size * point[0], size * point[1]]);
+	return points.map(p => [size * p[0], size * p[1]]);
 }
 
-function computeCoordinate(expression, coordinates, size) {
+function computeCoordinate(expression, coordinates) {
 	const values = Object.values(coordinates);
-	const code_to_evaluate = composeExpressionWithParameters(expression, Object.assign({}, coordinates, {
-		'size': size
-	}));
+	const code_to_evaluate = composeExpressionWithParameters(expression, Object.assign({}, coordinates));
 	return evaluate(code_to_evaluate);
 }
 
-function computeCellScreenSize(sized_points) {
+function computeCellScreenSize(points) {
 	return {
-		'width': Math.max(...sized_points.map(point => point[0])),
-		'height': Math.max(...sized_points.map(point => point[1]))
+		'width': Math.max(...points.map(p => p[0])),
+		'height': Math.max(...points.map(p => p[1]))
 	}
 }
 
@@ -47,8 +45,8 @@ function Cell(props) {
 
 	const {width, height} = computeCellScreenSize(sized_points);
 
-	const screen_x = computeCoordinate(cell_config.position.x, coordinates, size);
-	const screen_y = computeCoordinate(cell_config.position.y, coordinates, size);
+	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
+	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
 
 	return <svg className={"cell" + (selected ? " selected" : "")} style={{
 			'width': width + 'px',

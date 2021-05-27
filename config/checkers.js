@@ -9,8 +9,8 @@ const config = {
 			[1,	0]
 		],
 		'position': {
-			'x': 'x * size',
-			'y': 'y * size'
+			'x': 'x',
+			'y': 'y'
 		},
 		'colors': {
 			'white': {
