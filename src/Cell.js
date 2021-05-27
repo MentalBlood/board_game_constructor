@@ -38,7 +38,8 @@ function computeCellScreenSize(points) {
 }
 
 function Cell(props) {
-	const {cell_config, coordinates, shift, size, figure, player, selected, handleSelectThisCell} = props;
+	const {cell_config, coordinates, size, figure, figure_image, player, selected, handleSelectThisCell} = props;
+	console.log(figure_image)
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
@@ -48,17 +49,22 @@ function Cell(props) {
 	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
 	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
 
-	return <svg className={"cell" + (selected ? " selected" : "")} style={{
-			'width': width + 'px',
-			'height': height + 'px',
-			'transform': `translate(${screen_x + shift.x}px, ${screen_y + shift.y}px)`
-		}}
-		xmlns="http://www.w3.org/2000/svg" version="1.1"
-		onClick={handleSelectThisCell}>
-		<polygon fill={cell_config.colors[player].cell} points={sized_points.join(' ')}></polygon>;
-		<text style={{fontSize: height / 5 + 'px'}} className='unselectable' y={height / 5 * 2} fill={cell_config.colors[player].text}>
-			<tspan x={width / 3}>{Object.values(coordinates).join(', ')}</tspan>
-    		<tspan x={width / 8} dy={height / 5 * 2}>{figure}</tspan>
-    	</text>
-	</svg>
+	return <div className={"cell" + (selected ? " selected" : "")} style={{
+				'width': `${width}px`,
+				'height': `${height}px`,
+				'transform': `translate(${screen_x}px, ${screen_y}px)`
+			}}>
+		<svg style={{
+				'width': '100%',
+				'height': '100%'
+			}}
+			xmlns="http://www.w3.org/2000/svg" version="1.1"
+			onClick={handleSelectThisCell}>
+			<polygon fill={cell_config.colors[player].cell} points={sized_points.join(' ')}></polygon>
+			<text style={{fontSize: `${height / 5}px`}} className='unselectable' y={height / 5 * 2} fill={cell_config.colors[player].text}>
+				<tspan x={width / 3}>{Object.values(coordinates).join(', ')}</tspan>
+				<tspan x={width / 8} dy={height / 5 * 2}>{figure}</tspan>
+			</text>
+		</svg>
+	</div>
 }

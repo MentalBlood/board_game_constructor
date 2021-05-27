@@ -22,8 +22,13 @@
 }
 
 .gameState {
-	margin: auto 1vmin;
+	margin: auto;
 	font-size: 5vmin;
+}
+
+.board {
+	margin: auto;
+	position: relative;
 }
 
 .cell {

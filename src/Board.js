@@ -34,7 +34,7 @@ function computeBoardSize(cell_config, board) {
 }
 
 function Board(props) {
-	const {cell_config, board, handleSelectCell, selected_cell} = props;
+	const {cell_config, board, handleSelectCell, selected_cell, figure_image} = props;
 	const required_board_size = {
 		'width': window.innerWidth * 0.5,
 		'height': window.innerHeight * 0.9
@@ -47,15 +47,9 @@ function Board(props) {
 		'width': cell_size * base_board_size.width,
 		'height': cell_size * base_board_size.height
 	};
-	const board_position = {
-		'x': (required_board_size.width - board_size.width) / 2,
-		'y': (required_board_size.height - board_size.height) / 2
-	};
 
 	return (
 		<div className="board" style={{
-			'left': `${board_position.x}px`,
-			'top': `${board_position.y}px`,
 			'width': `${board_size.width}px`,
 			'height': `${board_size.height}px`
 		}}>{
@@ -64,7 +58,6 @@ function Board(props) {
 				<Cell
 					key={Object.values(cell.coordinates).join('_')}
 					{...cell}
-					shift={board_position}
 					cell_config={cell_config}
 					size={cell_size}
 					handleSelectThisCell={() => handleSelectCell(cell)}

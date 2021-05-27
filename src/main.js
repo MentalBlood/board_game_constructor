@@ -103,7 +103,7 @@ class Root extends React.Component {
 
 	componentDidMount() {
 		this.startGame();
-        window.addEventListener('resize', this.handleResize.bind(this));
+		window.addEventListener('resize', this.handleResize.bind(this));
 	}
 
 	handleResize() {
@@ -116,7 +116,7 @@ class Root extends React.Component {
 
 	setGameState(game_state) {
 		if (this.state.config.game_states[game_state])
-			this.setState(state => ({'game_state': game_state}), () => console.log('setGameState', this.state.game_state));
+			this.setState(state => ({'game_state': game_state}));
 	}
 
 	composeCellWithoutData(cell) {
@@ -206,7 +206,8 @@ class Root extends React.Component {
 						'coordinates': coordinates,
 						'moves_made': 0,
 						'player': player,
-						'figure': figure
+						'figure': figure,
+						'figure_image': this.state.config.figures[figure].image
 					}, result_board, false);
 				}
 			}
