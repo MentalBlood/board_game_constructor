@@ -99,6 +99,8 @@ class Root extends React.Component {
 			'check_win': 'passive',
 			'end': 'active'
 		}
+
+		this._ref = React.createRef();
 	}
 
 	componentDidMount() {
@@ -206,8 +208,7 @@ class Root extends React.Component {
 						'coordinates': coordinates,
 						'moves_made': 0,
 						'player': player,
-						'figure': figure,
-						'figure_image': this.state.config.figures[figure].image
+						'figure': figure
 					}, result_board, false);
 				}
 			}
@@ -544,7 +545,7 @@ class Root extends React.Component {
 
 	render() {
 		const unpacked_board = this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board);
-		return (<div className='app'>
+		return (<div className='app' ref={this._ref}>
 			<div className="gameUI">
 				<Board
 					board={unpacked_board}

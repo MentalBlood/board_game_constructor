@@ -38,8 +38,7 @@ function computeCellScreenSize(points) {
 }
 
 function Cell(props) {
-	const {cell_config, coordinates, size, figure, figure_image, player, selected, handleSelectThisCell} = props;
-	console.log(figure_image)
+	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
@@ -49,22 +48,27 @@ function Cell(props) {
 	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
 	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
 
-	return <div className={"cell" + (selected ? " selected" : "")} style={{
+	return <div className={"cellWithFigure" + (selected ? " selected" : "")} style={{
 				'width': `${width}px`,
 				'height': `${height}px`,
 				'transform': `translate(${screen_x}px, ${screen_y}px)`
 			}}>
-		<svg style={{
+		<svg className='cell' style={{
 				'width': '100%',
 				'height': '100%'
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
-			<polygon fill={cell_config.colors[player].cell} points={sized_points.join(' ')}></polygon>
-			<text style={{fontSize: `${height / 5}px`}} className='unselectable' y={height / 5 * 2} fill={cell_config.colors[player].text}>
-				<tspan x={width / 3}>{Object.values(coordinates).join(', ')}</tspan>
-				<tspan x={width / 8} dy={height / 5 * 2}>{figure}</tspan>
-			</text>
+			<polygon fill={cell_config.colors[undefined].cell} points={sized_points.join(' ')}></polygon>
 		</svg>
+		{
+			figure ? 
+			<img className='figure'
+				src={`config/chess/img/figures/${player}/${figure}.svg`}
+				alt={figure} 
+				draggable={false}
+				onClick={handleSelectThisCell}></img> 
+			: null
+		}
 	</div>
 }

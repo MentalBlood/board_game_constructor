@@ -30,6 +30,7 @@ const config = {
 	'board': [],
 	'figures': {
 		'king': {
+			'image': 'src/img/chess/king.svg',
 			'movement': [{
 				'x': 1,
 				'also_reversed': true

@@ -31,16 +31,27 @@
 	position: relative;
 }
 
-.cell {
+.cellWithFigure {
 	position: absolute;
 }
 
-.cell:not(.selected) {
+.cellWithFigure:not(.selected) {
 	filter: invert(0%);
 }
 
-.cell.selected {
+.cellWithFigure.selected {
 	filter: invert(80%);
+}
+
+.cell {
+	position: absolute;
+	z-index: -1;
+}
+
+.figure {
+	z-index: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .config {
