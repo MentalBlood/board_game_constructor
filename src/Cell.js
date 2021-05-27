@@ -38,7 +38,7 @@ function computeCellScreenSize(points) {
 }
 
 function Cell(props) {
-	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
+	const {cell_config, coordinates, shift, size, figure, player, selected, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
@@ -51,7 +51,7 @@ function Cell(props) {
 	return <svg className={"cell" + (selected ? " selected" : "")} style={{
 			'width': width + 'px',
 			'height': height + 'px',
-			'transform': `translate(${screen_x + 'px'}, ${screen_y + 'px'})`
+			'transform': `translate(${screen_x + shift.x}px, ${screen_y + shift.y}px)`
 		}}
 		xmlns="http://www.w3.org/2000/svg" version="1.1"
 		onClick={handleSelectThisCell}>

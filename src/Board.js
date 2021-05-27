@@ -43,17 +43,28 @@ function Board(props) {
 	const cell_size = Math.min(
 		required_board_size.width / base_board_size.width,
 		required_board_size.height / base_board_size.height);
+	const board_size = {
+		'width': cell_size * base_board_size.width,
+		'height': cell_size * base_board_size.height
+	};
+	const board_position = {
+		'x': (required_board_size.width - board_size.width) / 2,
+		'y': (required_board_size.height - board_size.height) / 2
+	};
 
 	return (
 		<div className="board" style={{
-			'width': cell_size * base_board_size.width + 'px',
-			'height': cell_size * base_board_size.height + 'px'
+			'left': `${board_position.x}px`,
+			'top': `${board_position.y}px`,
+			'width': `${board_size.width}px`,
+			'height': `${board_size.height}px`
 		}}>{
 			board.map(
 				cell =>
 				<Cell
 					key={Object.values(cell.coordinates).join('_')}
 					{...cell}
+					shift={board_position}
 					cell_config={cell_config}
 					size={cell_size}
 					handleSelectThisCell={() => handleSelectCell(cell)}
