@@ -47,7 +47,7 @@ class Root extends React.Component {
 			'config': config
 		}
 		
-		this.state.config_text = JSON.stringify(this.state.config, null, '\t');
+		this.state.config_text = JSON.stringify(this.state.config, null, '   ');
 		this.state = Object.assign(this.state, this.compile_());
 
 		this.actions = {
