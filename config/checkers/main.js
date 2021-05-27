@@ -43,12 +43,40 @@ const config = {
 			}],
 			'cell_actions': {
 				'destination': [{
+					'actions': ['cancel'],
+					'if': [{
+						'computed': {
+							'is_figure': true
+						}
+					}]
+				}, {
 					'actions': [{
 						'action': 'replace',
 						'parameters': {
 							'new_figure': 'king'
 						}
-					}, 'move'],
+					}],
+					'if': [{
+						'self': {
+							'player': 'white'
+						},
+						'target': {
+							'coordinates': {
+								'y': 7
+							}
+						}
+					}, {
+						'self': {
+							'player': 'black'
+						},
+						'target': {
+							'coordinates': {
+								'y': 0
+							}
+						}
+					}]
+				}, {
+					'actions': ['move'],
 					'if': [{
 						'computed': {
 							'is_figure': false
@@ -101,6 +129,14 @@ const config = {
 					}, 'move'],
 				}],
 				'transition': [{
+					'actions': ['cancel'],
+					'if': [{
+						'computed': {
+							'is_figure': true,
+							'is_enemy': false
+						}
+					}]
+				}, {
 					'actions': ['take'],
 					'if': [{
 						'computed': {
@@ -121,9 +157,9 @@ const config = {
 				{'x': 0, 'y': 1},
 				{'x': 2, 'y': 1},
 				{'x': 4, 'y': 1},
+				{'x': 3, 'y': 2},
 				{'x': 6, 'y': 1},
 				{'x': 1, 'y': 2},
-				{'x': 3, 'y': 2},
 				{'x': 5, 'y': 2},
 				{'x': 7, 'y': 2}
 			]

@@ -29,10 +29,32 @@ function dictFromTwoLists(a, b) {
 }
 
 function matchDict(dict, conditions_dict) {
-	for (const key in conditions_dict)
-		if (dict[key] != conditions_dict[key])
+	for (const key in conditions_dict) {
+		if (typeof(dict[key]) === 'object') {
+			if (!matchDict(dict[key], conditions_dict[key]))
+				return false;
+		} else if (dict[key] != conditions_dict[key])
 			return false;
+	}
 	return true;
+}
+
+function joinDicts(a, b) {
+	const result = Object.assign({}, a);
+	for (const key in b) {
+		if (result[key]) {
+			if (Array.isArray(result[key]) && Array.isArray(b[key])) {
+				result[key].push.apply(result[key], b[key]);
+				continue;
+			}
+			if (isDict(result[key]) && isDict(b[key])) {
+				result[key] = joinDicts(result[key], b[key]);
+				continue;
+			}
+		}
+		result[key] = b[key];
+	}
+	return result;
 }
 
 class Root extends React.Component {
@@ -336,6 +358,7 @@ class Root extends React.Component {
 		const actions = [];
 
 		const destination_cell_actions = this.composeActionsForCell(cell_actions['destination'], to_cell, from_cell);
+		console.log('destination_cell_actions', cell_actions['destination'], destination_cell_actions)
 		if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
 			return [];
 		actions.push.apply(actions, destination_cell_actions);
@@ -372,7 +395,7 @@ class Root extends React.Component {
 			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
 			if (!coefficient)
 				continue;
-			const cell_actions = available_move.cell_actions || figure_info.cell_actions;
+			const cell_actions = joinDicts(available_move.cell_actions, figure_info.cell_actions);
 			const actions = this.composeActionsForAvailableMove(available_move, cell_actions, from_cell, to_cell, coefficient);
 			return actions;
 		}
