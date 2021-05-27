@@ -86,17 +86,19 @@ const config = {
 			}],
 			'cell_actions': {
 				'destination': [{
+					'actions': ['cancel'],
+					'if': {
+						'computed': {
+							'is_figure': true
+						}
+					}
+				}, {
 					'actions': [{
 						'action': 'replace',
 						'parameters': {
 							'new_figure': 'king'
 						}
 					}, 'move'],
-					'if': {
-						'computed': {
-							'is_figure': false
-						}
-					}
 				}],
 				'transition': [{
 					'actions': ['take'],
