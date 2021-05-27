@@ -176,7 +176,7 @@ const config = {
 						}]
 					}
 				}, {
-					'x': 1,
+					'x': -1,
 					'y': -1,
 					'cell_actions': {
 						'destination': [{
