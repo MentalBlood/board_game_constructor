@@ -49,18 +49,18 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['take', 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}, {
 					'actions': ['move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}]
 			}
 		},
@@ -71,22 +71,26 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['move'],
-							'if': {
+							'if': [{
 								'self': {
 									'moves_made': 0
 								},
 								'computed': {
 									'is_figure': false
 								}
-							}
+							}]
 						}],
 						'transition': [{
 							'actions': ['cancel'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_figure': true
 								}
-							}
+							}, {
+								'computed': {
+									'is_cell': false
+								}
+							}]
 						}]
 					}
 				}, {
@@ -94,11 +98,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_figure': false
 								}
-							}
+							}]
 						}]
 					}
 				}, {
@@ -107,11 +111,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['take', 'move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_enemy': true
 								}
-							}
+							}]
 						}]
 					}
 				}, {
@@ -120,11 +124,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['take', 'move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_enemy': true
 								}
-							}
+							}]
 						}]
 					}
 				}],
@@ -133,22 +137,26 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['move'],
-							'if': {
+							'if': [{
 								'self': {
 									'moves_made': 0
 								},
 								'computed': {
 									'is_figure': false
 								}
-							}
+							}]
 						}],
 						'transition': [{
 							'actions': ['cancel'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_figure': true
 								}
-							}
+							}, {
+								'computed': {
+									'is_cell': false
+								}
+							}]
 						}]
 					}
 				}, {
@@ -156,11 +164,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_figure': false
 								}
-							}
+							}]
 						}]
 					}
 				}, {
@@ -169,11 +177,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['take', 'move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_enemy': true
 								}
-							}
+							}]
 						}]
 					}
 				}, {
@@ -182,11 +190,11 @@ const config = {
 					'cell_actions': {
 						'destination': [{
 							'actions': ['take', 'move'],
-							'if': {
+							'if': [{
 								'computed': {
 									'is_enemy': true
 								}
-							}
+							}]
 						}]
 					}
 				}]
@@ -213,18 +221,18 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}, {
 					'actions': ['take', 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}]
 			}
 		},
@@ -243,26 +251,30 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}, {
 					'actions': ['take', 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}],
 				'transition': [{
 					'actions': ['cancel'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': true
 						}
-					}
+					}, {
+						'computed': {
+							'is_cell': false
+						}
+					}]
 				}]
 			}
 		},
@@ -279,26 +291,30 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}, {
 					'actions': ['take', 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}],
 				'transition': [{
 					'actions': ['cancel'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': true
 						}
-					}
+					}, {
+						'computed': {
+							'is_cell': false
+						}
+					}]
 				}]
 			}
 		},
@@ -325,26 +341,30 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}, {
 					'actions': ['take', 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}],
 				'transition': [{
 					'actions': ['cancel'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': true
 						}
-					}
+					}, {
+						'computed': {
+							'is_cell': false
+						}
+					}]
 				}]
 			}
 		}
@@ -366,14 +386,14 @@ const config = {
 		'cell_actions': {
 			'destination': [{
 				'actions': ['move'],
-				'if': {
+				'if': [{
 					'self': {
 						'moves_made': 0
 					},
 					'computed': {
 						'is_figure': false
 					}
-				}
+				}]
 			}]
 		}
 	}, {
@@ -398,21 +418,21 @@ const config = {
 		'cell_actions': {
 			'destination': [{
 				'actions': ['move'],
-				'if': {
+				'if': [{
 					'self': {
 						'moves_made': 0
 					},
 					'computed': {
 						'is_figure': false
 					}
-				}
+				}]
 			}]
 		}
 	}],
 	'initial_position': {
 		'white': {
 			'king': [
-				{'x': 3, 'y': 0}
+				{'x': 6, 'y': 0}
 			],
 			'queen': [
 			],
@@ -440,7 +460,8 @@ const config = {
 				{'x': 3, 'y': 7}
 			],
 			'queen': [
-				{'x': 4, 'y': 7}
+				{'x': 4, 'y': 7},
+				{'x': 3, 'y': 0}
 			],
 			'pawn': [
 				{'x': 0, 'y': 6},
@@ -508,14 +529,14 @@ const config = {
 			},
 			'next': [{
 				'state': 'black_move',
-				'if': {
+				'if': [{
 					'result': false
-				}
+				}]
 			}, {
 				'state': 'white_won',
-				'if': {
+				'if': [{
 					'result': true
-				}
+				}]
 			}]
 		},
 		'check_black_win': {
@@ -525,14 +546,14 @@ const config = {
 			},
 			'next': [{
 				'state': 'white_move',
-				'if': {
+				'if': [{
 					'result': false
-				}
+				}]
 			}, {
 				'state': 'black_won',
-				'if': {
+				'if': [{
 					'result': true
-				}
+				}]
 			}]
 		},
 		'white_won': {
@@ -545,6 +566,6 @@ const config = {
 	'initial_game_state': 'white_move'
 }
 
-for (let x = 0; x < 8; x++)
+for (let x = 0; x < 8; x+=3)
 	for (let y = 0; y < 8; y++)
 		config.board.push({'x': x, 'y': y});

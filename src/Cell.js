@@ -59,7 +59,7 @@ function Cell(props) {
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
-			<polygon fill={cell_config.colors[undefined].cell} points={sized_points.join(' ')}></polygon>
+			<polygon fill='darkgrey' points={sized_points.join(' ')}></polygon>
 		</svg>
 		{
 			figure ? 

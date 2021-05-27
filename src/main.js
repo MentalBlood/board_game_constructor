@@ -69,8 +69,9 @@ class Root extends React.Component {
 		};
 
 		this.values_computers = {
-			'is_enemy': (cell, from_cell) => (cell.player !== undefined) && (cell.player != from_cell.player),
-			'is_figure': (cell, from_cell) => cell.player !== undefined
+			'is_cell': (cell, from_cell) => Boolean(cell),
+			'is_enemy': (cell, from_cell) => (cell?.player !== undefined) && (cell?.player != from_cell?.player),
+			'is_figure': (cell, from_cell) => cell?.player !== undefined
 		};
 
 		this.entities_getters = {
@@ -282,18 +283,25 @@ class Root extends React.Component {
 		const matched_actions = [];
 		for (const a of actions) {
 			if (a['if']) {
-				if (a['if'].self) {
-					if (!matchDict(from_cell, a['if'].self))
-						continue;
+				let some_conditions_fit = false;
+				for (const conditions of a['if']) {
+					if (conditions.self) {
+						if (!matchDict(from_cell, conditions.self))
+							continue;
+					}
+					if (conditions.target)
+						if (!matchDict(cell, conditions.target))
+							continue;
+					if (conditions.computed) {
+						const computed_dict = this.composeComputedValues(Object.keys(conditions.computed), cell, from_cell);
+						if (!matchDict(computed_dict, conditions.computed))
+							continue;
+					}
+					some_conditions_fit = true;
+					break;
 				}
-				if (a['if'].target)
-					if (!matchDict(cell, a['if'].target))
-						continue;
-				if (a['if'].computed) {
-					const computed_dict = this.composeComputedValues(Object.keys(a['if'].computed), cell, from_cell);
-					if (!matchDict(computed_dict, a['if'].computed))
-						continue;
-				}
+				if (!some_conditions_fit)
+					continue;
 			}
 			matched_actions.push({
 				'target_cell': cell,
@@ -341,7 +349,7 @@ class Root extends React.Component {
 				coordinates_delta,
 				step);
 			const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
-			// if (!current_cell?.figure)
+			// if (!current_cell)
 			// 	continue;
 			const new_actions = this.composeActionsForCell(cell_actions['transition'], current_cell, from_cell);
 			actions_for_transition_cells.push(...new_actions);
@@ -506,8 +514,9 @@ class Root extends React.Component {
 			return current_state_info.next;
 		const data = this.state_data_getters[current_state_info.type](this.state.board);
 		for (const branch of current_state_info.next) {
-			if (matchDict({ 'result': data }, branch['if']))
-				return branch.state;
+			for (const conditions of branch['if'])
+				if (matchDict({ 'result': data }, conditions))
+					return branch.state;
 		}
 	}
 
