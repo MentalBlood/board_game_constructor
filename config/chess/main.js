@@ -432,9 +432,10 @@ const config = {
 	'initial_position': {
 		'white': {
 			'king': [
-				{'x': 6, 'y': 0}
+				{'x': 3, 'y': 0}
 			],
 			'queen': [
+				{'x': 4, 'y': 0}
 			],
 			'pawn': [
 				{'x': 0, 'y': 1},
@@ -447,12 +448,16 @@ const config = {
 				{'x': 7, 'y': 1}
 			],
 			'bishop': [
+				{'x': 2, 'y': 0},
+				{'x': 5, 'y': 0}
 			],
 			'rook': [
 				{'x': 0, 'y': 0},
 				{'x': 7, 'y': 0}
 			],
 			'knight': [
+				{'x': 1, 'y': 0},
+				{'x': 6, 'y': 0}
 			]
 		},
 		'black': {
@@ -460,8 +465,7 @@ const config = {
 				{'x': 3, 'y': 7}
 			],
 			'queen': [
-				{'x': 4, 'y': 7},
-				{'x': 3, 'y': 0}
+				{'x': 4, 'y': 7}
 			],
 			'pawn': [
 				{'x': 0, 'y': 6},
@@ -566,6 +570,6 @@ const config = {
 	'initial_game_state': 'white_move'
 }
 
-for (let x = 0; x < 8; x+=3)
+for (let x = 0; x < 8; x++)
 	for (let y = 0; y < 8; y++)
 		config.board.push({'x': x, 'y': y});
