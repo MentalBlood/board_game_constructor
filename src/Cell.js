@@ -1,25 +1,51 @@
 'use strict';
 
-function composeCellPolygon(cell_config, size, player) {
-	const sized_points = [];
-	for (const point of cell_config.geometry)
-		sized_points.push(`${size * point[0]}, ${size * point[1]}`);
-	const points_arg = sized_points.join(' ');
-	return <polygon fill={cell_config.colors[player].cell} points={points_arg}></polygon>;
+function composeExpressionWithParameters(expression, parameters) {
+	const variables_defining = Object.keys(parameters).map(name => `const ${name} = ${parameters[name]};`).join('\n');
+	return `${variables_defining};\n${expression}`;
+}
+
+function evaluate(expression) {
+	return eval(expression);
+}
+
+function computeGeometry(cell_config, coordinates) {
+	return cell_config.geometry.map(point => point.map(c => {
+		if (typeof(c) === 'number')
+			return c;
+		if (typeof(c) !== 'string')
+			return;
+		const code_to_evaluate = composeExpressionWithParameters(c, coordinates);
+		return evaluate(code_to_evaluate);
+	}));
+}
+
+function composeSizedPoints(points, size) {
+	return points.map(point => [size * point[0], size * point[1]]);
 }
 
 function computeCoordinate(expression, coordinates, size) {
 	const values = Object.values(coordinates);
-	const variables_defining = Object.keys(coordinates).map(name => `const ${name} = coordinates.${name};`).join('\n');
-	const result = eval(`${variables_defining};\n${expression}`);
-	return result;
+	const code_to_evaluate = composeExpressionWithParameters(expression, Object.assign({}, coordinates, {
+		'size': size
+	}));
+	return evaluate(code_to_evaluate);
+}
+
+function computeCellScreenSize(sized_points) {
+	return {
+		'width': Math.max(...sized_points.map(point => point[0])),
+		'height': Math.max(...sized_points.map(point => point[1]))
+	}
 }
 
 function Cell(props) {
 	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
 
-	const width = Math.max(...cell_config.geometry.map(point => point[0])) * size;
-	const height = Math.max(...cell_config.geometry.map(point => point[1])) * size;
+	const points = computeGeometry(cell_config, coordinates);
+	const sized_points = composeSizedPoints(points, size);
+
+	const {width, height} = computeCellScreenSize(sized_points);
 
 	const screen_x = computeCoordinate(cell_config.position.x, coordinates, size);
 	const screen_y = computeCoordinate(cell_config.position.y, coordinates, size);
@@ -31,7 +57,7 @@ function Cell(props) {
 		}}
 		xmlns="http://www.w3.org/2000/svg" version="1.1"
 		onClick={handleSelectThisCell}>
-		{composeCellPolygon(cell_config, size, player)}
+		<polygon fill={cell_config.colors[player].cell} points={sized_points.join(' ')}></polygon>;
 		<text style={{fontSize: height / 5 + 'px'}} className='unselectable' y={height / 5 * 2} fill={cell_config.colors[player].text}>
 			<tspan x={width / 3}>{Object.values(coordinates).join(', ')}</tspan>
     		<tspan x={width / 8} dy={height / 5 * 2}>{figure}</tspan>
