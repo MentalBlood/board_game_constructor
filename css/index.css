@@ -11,6 +11,7 @@
 .app {
 	display: flex;
 	flex-direction: row;
+	background-color: lightgrey;
 }
 
 .gameUI {
