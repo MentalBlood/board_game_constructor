@@ -64,7 +64,7 @@ function Cell(props) {
 		{
 			figure ? 
 			<img className='figure'
-				src={`config/chess/img/figures/${player}/${figure}.svg`}
+				src={`config/checkers/img/figures/${player}/${figure}.svg`}
 				alt={figure} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 

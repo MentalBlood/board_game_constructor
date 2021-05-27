@@ -49,26 +49,26 @@ const config = {
 							'new_figure': 'king'
 						}
 					}, 'move'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': false
 						}
-					}
+					}]
 				}],
 				'transition': [{
 					'actions': ['take'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}, {
 					'actions': ['cancel'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': false
 						}
-					}
+					}]
 				}]
 			}
 		},
@@ -87,11 +87,11 @@ const config = {
 			'cell_actions': {
 				'destination': [{
 					'actions': ['cancel'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_figure': true
 						}
-					}
+					}]
 				}, {
 					'actions': [{
 						'action': 'replace',
@@ -102,11 +102,11 @@ const config = {
 				}],
 				'transition': [{
 					'actions': ['take'],
-					'if': {
+					'if': [{
 						'computed': {
 							'is_enemy': true
 						}
-					}
+					}]
 				}]
 			}
 		}
@@ -187,14 +187,14 @@ const config = {
 			},
 			'next': [{
 				'state': 'black_move',
-				'if': {
+				'if': [{
 					'result': false
-				}
+				}]
 			}, {
 				'state': 'white_won',
-				'if': {
+				'if': [{
 					'result': true
-				}
+				}]
 			}]
 		},
 		'check_black_win': {
@@ -204,14 +204,14 @@ const config = {
 			},
 			'next': [{
 				'state': 'white_move',
-				'if': {
+				'if': [{
 					'result': false
-				}
+				}]
 			}, {
 				'state': 'black_won',
-				'if': {
+				'if': [{
 					'result': true
-				}
+				}]
 			}]
 		},
 		'white_won': {
