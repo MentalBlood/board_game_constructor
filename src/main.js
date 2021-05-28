@@ -598,8 +598,9 @@ class Root extends React.Component {
 	}
 }
 
+const game_name = 'intellector';
+
 const rootElement = document.getElementById('root');
-const game_name = 'chess';
 let config = undefined;
 fetch(`config/${game_name}/main.json`)
 	.then(response => response.json())
