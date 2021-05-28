@@ -73,9 +73,9 @@ class Root extends React.Component {
 		this.state = Object.assign(this.state, this.compile_());
 
 		this.actions = {
-			'swap': ({cell_1, cell_2, board}) => {
-				this.setCellByCoordinates(cell_1.coordinates, Object.assign({}, cell_2), board);
-				this.setCellByCoordinates(cell_2.coordinates, Object.assign({}, cell_1), board);
+			'swap': ({from_cell, to_cell, board}) => {
+				this.setCellByCoordinates(from_cell.coordinates, Object.assign({}, to_cell), board);
+				this.setCellByCoordinates(to_cell.coordinates, Object.assign({}, from_cell), board);
 			},
 			'move': ({from_cell, to_cell, board}) => {
 				const from_cell_coordinates_temp = from_cell.coordinates;
