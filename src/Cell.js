@@ -41,6 +41,11 @@ function computeCellScreenSize(points) {
 	}
 }
 
+const default_cell_colors = {
+	'fill': '"darkgrey"',
+	'selector': '"skyblue"'
+}
+
 function Cell(props) {
 	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
 
@@ -52,11 +57,11 @@ function Cell(props) {
 	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
 	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
 
-	const color = cell_config.colors?.fill ? 
-		evaluateExpressionWithParameters(cell_config.colors.fill, coordinates)
-		: 'darkgrey';
+	const colors = Object.assign({}, default_cell_colors, cell_config.colors || {});
+	Object.keys(colors).map(type => 
+		colors[type] = evaluateExpressionWithParameters(colors[type], coordinates));
 
-	return <div className={"cellWithFigure" + (selected ? " selected" : "")} style={{
+	return <div className="cellWithFigure" style={{
 				'width': `${width}px`,
 				'height': `${height}px`,
 				'transform': `translate(${screen_x}px, ${screen_y}px)`
@@ -67,7 +72,7 @@ function Cell(props) {
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
-			<polygon fill={color} points={sized_points.join(' ')}></polygon>
+			<polygon fill={colors.fill} points={sized_points.join(' ')}></polygon>
 		</svg>
 		{
 			figure ? 
@@ -76,6 +81,13 @@ function Cell(props) {
 				alt={figure} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 
+			: null
+		}
+		{
+			selected ? 
+			<div className="selector" style={{
+				'border': `${Math.min(width, height) / 10}px solid ${colors.selector}`
+			}} onClick={handleSelectThisCell}></div>
 			: null
 		}
 	</div>
