@@ -18,8 +18,8 @@ function isObjectsEqual(object1, object2) {
 function computeBoardSize(cell_config, board) {
 	const cells = board.map(cell => {
 		const result = {
-			'x': computeCoordinate(cell_config.position.x, cell.coordinates),
-			'y': computeCoordinate(cell_config.position.y, cell.coordinates)
+			'x': evaluateExpressionWithParameters(cell_config.position.x, cell.coordinates),
+			'y': evaluateExpressionWithParameters(cell_config.position.y, cell.coordinates)
 		};
 		const geometry = computeGeometry(cell_config, cell.coordinates);
 		Object.assign(result, computeCellScreenSize(geometry));

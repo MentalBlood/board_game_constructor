@@ -28,12 +28,6 @@ function composeSizedPoints(points, size) {
 	return points.map(p => [size * p[0], size * p[1]]);
 }
 
-function computeCoordinate(expression, coordinates) {
-	const values = Object.values(coordinates);
-	const code_to_evaluate = composeExpressionWithParameters(expression, Object.assign({}, coordinates));
-	return evaluate(code_to_evaluate);
-}
-
 function computeCellScreenSize(points) {
 	return {
 		'width': Math.max(...points.map(p => p[0])),
@@ -60,8 +54,8 @@ function Cell(props) {
 
 	const {width, height} = computeCellScreenSize(sized_points);
 
-	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
-	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
+	const screen_x = evaluateExpressionWithParameters(cell_config.position.x, coordinates) * size;
+	const screen_y = evaluateExpressionWithParameters(cell_config.position.y, coordinates) * size;
 
 	const colors = Object.assign({}, default_cell_colors, cell_config.colors || {});
 	Object.keys(colors).map(type => 
