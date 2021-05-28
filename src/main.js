@@ -331,6 +331,7 @@ class Root extends React.Component {
 				'actions': a.actions
 			});
 		}
+		console.log('matched_actions', matched_actions)
 		return matched_actions;
 	}
 
