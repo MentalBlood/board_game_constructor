@@ -46,11 +46,17 @@ const default_cell_colors = {
 	'selector': '"skyblue"'
 }
 
+function composeZoomedGeometry(points, factor) {
+	const center = points.reduce((acc, curr) => [acc[0] + curr[0], acc[1] + curr[1]]).map(c => c / points.length);
+	return points.map(p => [center[0] + factor * (p[0] - center[0]), center[1] + factor * (p[1] - center[1])]);
+}
+
 function Cell(props) {
 	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
+	const zoomed_sized_points = selected ? composeZoomedGeometry(sized_points, 0.85) : sized_points;
 
 	const {width, height} = computeCellScreenSize(sized_points);
 
@@ -72,7 +78,12 @@ function Cell(props) {
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
-			<polygon fill={colors.fill} points={sized_points.join(' ')}></polygon>
+			{
+				selected ? 
+				<polygon fill={colors.selector} points={sized_points.join(' ')}></polygon>
+				: null
+			}
+			<polygon fill={colors.fill} points={zoomed_sized_points.join(' ')}></polygon>
 		</svg>
 		{
 			figure ? 
@@ -81,13 +92,6 @@ function Cell(props) {
 				alt={figure} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 
-			: null
-		}
-		{
-			selected ? 
-			<div className="selector" style={{
-				'border': `${Math.min(width, height) / 10}px solid ${colors.selector}`
-			}} onClick={handleSelectThisCell}></div>
 			: null
 		}
 	</div>
