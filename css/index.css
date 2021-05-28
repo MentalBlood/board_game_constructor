@@ -49,6 +49,16 @@
 	z-index: 100;
 }
 
+.cellWithFigure:not(:hover) .figure {
+	transform: scale(1);
+	transition-duration: 0.2s;
+}
+
+.cellWithFigure:hover .figure {
+	transform: scale(1.15);
+	transition-duration: 0.2s;
+}
+
 .cell {
 	position: absolute;
 	z-index: -1;
@@ -75,7 +85,6 @@
 
 .compileButton {
 	border: none;
-	background-color: limegreen;
 	height: 10vh;
 	font-size: 4vh;
 }
