@@ -81,6 +81,7 @@
 	width: 40vw;
 	height: 80vh;
 	outline: none;
+	resize: none;
 }
 
 .compileButton {
