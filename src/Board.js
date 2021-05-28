@@ -34,7 +34,7 @@ function computeBoardSize(cell_config, board) {
 }
 
 function Board(props) {
-	const {cell_config, board, handleSelectCell, selected_cell, figure_image} = props;
+	const {cell_config, resources, board, handleSelectCell, selected_cell, figure_image} = props;
 	const required_board_size = {
 		'width': window.innerWidth * 0.5,
 		'height': window.innerHeight * 0.9
@@ -56,8 +56,9 @@ function Board(props) {
 			board.map(
 				cell =>
 				<Cell
-					key={Object.values(cell.coordinates).join('_')}
+					key={Object.values(cell.coordinates).concat([cell.figure, resources.path]).join('_')}
 					{...cell}
+					resources={resources}
 					cell_config={cell_config}
 					size={cell_size}
 					handleSelectThisCell={() => handleSelectCell(cell)}

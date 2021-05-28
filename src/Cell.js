@@ -52,7 +52,7 @@ function composeZoomedGeometry(points, factor) {
 }
 
 function Cell(props) {
-	const {cell_config, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
+	const {cell_config, resources, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
@@ -88,7 +88,7 @@ function Cell(props) {
 		{
 			figure ? 
 			<img className='figure'
-				src={`config/${game_name}/img/figures/${player}/${figure}.svg`}
+				src={`${resources.path}/img/figures/${player}/${figure}.svg`}
 				alt={figure} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 

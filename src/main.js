@@ -75,9 +75,6 @@ class Root extends React.Component {
 			'config_text': undefined,
 			'config': undefined
 		}
-		
-		// this.state.config_text = JSON.stringify(this.state.config, null, '   ');
-		// this.state = Object.assign(this.state, this.compile_(JSON.parse(this.state.config_text)));
 
 		this.actions = {
 			'swap': ({from_cell, to_cell, board}) => {
@@ -133,15 +130,15 @@ class Root extends React.Component {
 		this._ref = React.createRef();
 	}
 
-	fetchConfigForGame(name, then) {
-		fetch(`config/${game_name}/main.json`)
+	fetchSetConfigForGame(name, then) {
+		fetch(`config/${name}/main.json`)
 			.then(response => response.text())
-			.then(text => this.setState(this.compile_(text), then))
+			.then(text => this.setState(Object.assign(this.compile_(text), {'game_name': name}), then))
 	}
 
 	componentDidMount() {
 		window.addEventListener('resize', this.handleResize.bind(this));
-		this.fetchConfigForGame(this.state.game_name, () => this.startGame());
+		this.fetchSetConfigForGame(this.state.game_name, () => this.startGame());
 	}
 
 	handleResize() {
@@ -338,7 +335,7 @@ class Root extends React.Component {
 				'actions': a.actions
 			});
 		}
-		console.log('matched_actions', matched_actions)
+		console.log('matched_actions', matched_actions);
 		return matched_actions;
 	}
 
@@ -582,8 +579,10 @@ class Root extends React.Component {
 		}
 	}
 
-	handleGameNameSelectChange() {
-
+	handleGameNameSelectChange(event) {
+		const new_game_name = event.target.value;
+		this.fetchSetConfigForGame(new_game_name, () => this.startGame());
+		
 	}
 
 	render() {
@@ -595,6 +594,7 @@ class Root extends React.Component {
 			this.state.config ? 
 			<div className="gameUI">
 				<Board
+					resources={{'path': `config/${this.state.game_name}`}}
 					board={unpacked_board}
 					cell_config={this.state.config.cell}
 					handleSelectCell={this.handleSelectCell.bind(this)}
@@ -608,7 +608,7 @@ class Root extends React.Component {
 				<textarea className='configText'
 					value={this.state.config_text}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
-				<select value={this.state.game_name} onChange={this.handleGameNameSelectChange}>
+				<select value={this.state.game_name} onChange={this.handleGameNameSelectChange.bind(this)}>
 					{games_available.map(name => (
 						<option key={name} value={name}>{name}</option>
 					))}
@@ -619,8 +619,6 @@ class Root extends React.Component {
 		</div>);
 	}
 }
-
-const game_name = 'chess';
 
 const rootElement = document.getElementById('root');
 ReactDOM.render(React.createElement(Root), rootElement);
