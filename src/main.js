@@ -133,7 +133,10 @@ class Root extends React.Component {
 	fetchSetConfigForGame(name, then) {
 		fetch(`config/${name}/main.json`)
 			.then(response => response.text())
-			.then(text => this.setState(Object.assign(this.compile_(text), {'game_name': name}), then))
+			.then(text => 
+				this.setState(Object.assign(
+					this.compile_(text.replaceAll('\t', '   ')), 
+					{'game_name': name}), then));
 	}
 
 	componentDidMount() {
@@ -600,7 +603,7 @@ class Root extends React.Component {
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
-				<div className="gameState unselectable">{this.state.game_state.replace('_', ' ')}</div>
+				<div className="gameState unselectable">{this.state.game_state.replaceAll('_', ' ')}</div>
 			</div>
 			: null
 		}
