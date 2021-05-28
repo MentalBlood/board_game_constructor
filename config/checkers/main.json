@@ -17,6 +17,10 @@
 		}
 	},
 	"board": {
+		"rotation_angle": {
+			"white": 180,
+			"black": 0
+		},
 		"cells": [
 			{"x": 0, "y": 0},
 			{"x": 0, "y": 1},

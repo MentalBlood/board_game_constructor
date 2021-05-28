@@ -591,6 +591,7 @@ class Root extends React.Component {
 		const unpacked_board = this.state.config ? 
 			this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board)
 			: undefined;
+		const board_rotation_angle = this.state.config?.board.rotation_angle[this.getCurrentPlayer()];
 		return (<div className='app' ref={this._ref}>
 		{
 			this.state.config ? 
@@ -598,6 +599,7 @@ class Root extends React.Component {
 				<Board
 					resources={{'path': `config/${this.state.game_name}`}}
 					board={unpacked_board}
+					rotation_angle={board_rotation_angle}
 					cell_config={this.state.config.cell}
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}

@@ -34,8 +34,7 @@ function computeBoardSize(cell_config, board) {
 }
 
 function Board(props) {
-	const {cell_config, resources, board, handleSelectCell, selected_cell, figure_image} = props;
-	const rotation_angle = 180;
+	const {cell_config, resources, board, rotation_angle, handleSelectCell, selected_cell, figure_image} = props;
 	const required_board_size = {
 		'width': window.innerWidth * 0.5,
 		'height': window.innerHeight * 0.9

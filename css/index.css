@@ -29,6 +29,7 @@
 .board {
 	margin: auto;
 	position: relative;
+	transition-duration: 0.5s;
 }
 
 .cellWithFigure {
@@ -49,14 +50,8 @@
 	z-index: 100;
 }
 
-.cellWithFigure:not(:hover) .figure {
-	transform: scale(1);
-	transition-duration: 0.2s;
-}
-
-.cellWithFigure:hover .figure {
-	transform: scale(1.15);
-	transition-duration: 0.2s;
+.cellWithFigure .figure {
+	transition-duration: 0.5s;
 }
 
 .cell {
