@@ -57,20 +57,27 @@ function joinDicts(a, b) {
 	return result;
 }
 
+const games_available = [
+	'chess',
+	'checkers',
+	'intellector'
+];
+
 class Root extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
+			'game_name': 'chess',
 			'board': undefined,
 			'game_state': undefined,
 			'selected_cell': undefined,
 			'config_text': undefined,
-			'config': config
+			'config': undefined
 		}
 		
-		this.state.config_text = JSON.stringify(this.state.config, null, '   ');
-		this.state = Object.assign(this.state, this.compile_());
+		// this.state.config_text = JSON.stringify(this.state.config, null, '   ');
+		// this.state = Object.assign(this.state, this.compile_(JSON.parse(this.state.config_text)));
 
 		this.actions = {
 			'swap': ({from_cell, to_cell, board}) => {
@@ -126,9 +133,15 @@ class Root extends React.Component {
 		this._ref = React.createRef();
 	}
 
+	fetchConfigForGame(name, then) {
+		fetch(`config/${game_name}/main.json`)
+			.then(response => response.text())
+			.then(text => this.setState(this.compile_(text), then))
+	}
+
 	componentDidMount() {
-		this.startGame();
 		window.addEventListener('resize', this.handleResize.bind(this));
+		this.fetchConfigForGame(this.state.game_name, () => this.startGame());
 	}
 
 	handleResize() {
@@ -169,23 +182,17 @@ class Root extends React.Component {
 		this.setState({'config_text': new_text});
 	}
 
-	setCellByCoordinates(coordinates, element_to_insert, board, create_path=true) {
-		const cell_coords_names = this.state.config.cell.coordinates_names;
+	setCellByCoordinates(coordinates, element_to_insert, board, cell_coords_names) {
+		cell_coords_names = cell_coords_names || this.state.config.cell.coordinates_names;
 		const coordinates_list = cell_coords_names.map(name => coordinates[name]);
 		let current_level = board;
 		for (let i = 0; i < coordinates_list.length - 1; i++) {
 			const c = coordinates_list[i];
-			if (!current_level[c]) {
-				if (create_path)
-					current_level[c] = {};
-				else 
-					return;
-			}
-			current_level = current_level[c];
+			if (!current_level[c])
+				current_level[c] = {};
+			current_level = current_level[c]
 		}
 		const c = coordinates_list[coordinates_list.length - 1];
-		if (!current_level[c] && !create_path)
-			return;
 		if (typeof(element_to_insert) == 'function')
 			element_to_insert = element_to_insert(current_level[c]);
 		if (current_level[c]?.coordinates)
@@ -194,8 +201,9 @@ class Root extends React.Component {
 			current_level[c] = Object.assign({}, element_to_insert);
 	}
 
-	setCellEmpty(coordinates, board) {
-		this.setCellByCoordinates(coordinates, {'coordinates': coordinates}, board);
+	setCellEmpty(coordinates, board, cell_coords_names) {
+		cell_coords_names = cell_coords_names || this.state.config.cell.coordinates_names;
+		this.setCellByCoordinates(coordinates, {'coordinates': coordinates}, board, cell_coords_names);
 	}
 
 	getCellByCoordinates_(cell_coords_names, coordinates, board) {
@@ -221,9 +229,8 @@ class Root extends React.Component {
 
 	composeBoardWithFigures(cell_coords_names, position, board_config) {
 		const result_board = {};
-		for (const cell_coordinates of board_config) {
-			this.setCellEmpty(cell_coordinates, result_board);
-		}
+		for (const cell_coordinates of board_config)
+			this.setCellEmpty(cell_coordinates, result_board, cell_coords_names);
 		for (const player in position) {
 			for (const figure in position[player]) {
 				for (const coordinates of position[player][figure]) {
@@ -232,7 +239,7 @@ class Root extends React.Component {
 						'moves_made': 0,
 						'player': player,
 						'figure': figure
-					}, result_board, false);
+					}, result_board, cell_coords_names);
 				}
 			}
 		}
@@ -244,10 +251,11 @@ class Root extends React.Component {
 		return keys_and_elements.map(k_e => k_e.element);
 	}
 
-	compile_() {
-		const new_config = JSON.parse(this.state.config_text);
+	compile_(new_config_text) {
+		const new_config = JSON.parse(new_config_text);
 		return {
 			'config': new_config,
+			'config_text': new_config_text,
 			'game_state': new_config.initial_game_state,
 			'position': new_config.initial_position,
 			'board': this.composeBoardWithFigures(
@@ -259,8 +267,7 @@ class Root extends React.Component {
 	}
 
 	compile() {
-		const new_config = JSON.parse(this.state.config_text);
-		this.setState(this.compile_());
+		this.setState(this.compile_(JSON.parse(this.state.config_text)));
 	}
 
 	isVectorDividedByAnother(cell_coords_names, v, divider) {
@@ -502,7 +509,7 @@ class Root extends React.Component {
 	composeStateAfterActions(state, from_cell, actions_info) {
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
-		}), state.board, false);
+		}), state.board);
 		for (const info of actions_info) {
 			for (const a of info.actions) {
 				let name, parameters;
@@ -576,8 +583,12 @@ class Root extends React.Component {
 	}
 
 	render() {
-		const unpacked_board = this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board);
+		const unpacked_board = this.state.config ? 
+			this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board)
+			: undefined;
 		return (<div className='app' ref={this._ref}>
+		{
+			this.state.config ? 
 			<div className="gameUI">
 				<Board
 					board={unpacked_board}
@@ -587,10 +598,13 @@ class Root extends React.Component {
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
 				<div className="gameState unselectable">{this.state.game_state.replace('_', ' ')}</div>
 			</div>
+			: null
+		}
 			<div className='config'>
 				<textarea className='configText'
 					value={this.state.config_text}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
+				{/*<select value={this.state}></select>*/}
 				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
 			</div>
@@ -598,11 +612,7 @@ class Root extends React.Component {
 	}
 }
 
-const game_name = 'intellector';
+const game_name = 'chess';
 
 const rootElement = document.getElementById('root');
-let config = undefined;
-fetch(`config/${game_name}/main.json`)
-	.then(response => response.json())
-	.then(data => config = data)
-	.then(() => ReactDOM.render(React.createElement(Root), rootElement));
+ReactDOM.render(React.createElement(Root), rootElement);
