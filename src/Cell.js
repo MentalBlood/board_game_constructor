@@ -46,7 +46,7 @@ function composeZoomedGeometry(points, factor) {
 }
 
 function Cell(props) {
-	const {cell_config, resources, coordinates, size, figure, player, selected, handleSelectThisCell} = props;
+	const {cell_config, resources, coordinates, size, figure_rotation_angle, figure, player, selected, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
@@ -81,7 +81,9 @@ function Cell(props) {
 		</svg>
 		{
 			figure ? 
-			<img className='figure'
+			<img className='figure' style={{
+					'transform': `rotate(${figure_rotation_angle}deg)`
+				}}
 				src={`${resources.path}/img/figures/${player}/${figure}.svg`}
 				alt={figure} 
 				draggable={false}

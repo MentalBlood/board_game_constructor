@@ -35,6 +35,7 @@ function computeBoardSize(cell_config, board) {
 
 function Board(props) {
 	const {cell_config, resources, board, handleSelectCell, selected_cell, figure_image} = props;
+	const rotation_angle = 180;
 	const required_board_size = {
 		'width': window.innerWidth * 0.5,
 		'height': window.innerHeight * 0.9
@@ -51,7 +52,8 @@ function Board(props) {
 	return (
 		<div className="board" style={{
 			'width': `${board_size.width}px`,
-			'height': `${board_size.height}px`
+			'height': `${board_size.height}px`,
+			'transform': `rotate(${rotation_angle}deg)`
 		}}>{
 			board.map(
 				cell =>
@@ -61,6 +63,7 @@ function Board(props) {
 					resources={resources}
 					cell_config={cell_config}
 					size={cell_size}
+					figure_rotation_angle={-rotation_angle}
 					handleSelectThisCell={() => handleSelectCell(cell)}
 					selected={isObjectsEqual(selected_cell, cell)}>
 				</Cell>)
