@@ -135,7 +135,7 @@ class Root extends React.Component {
 			.then(response => response.text())
 			.then(text => 
 				this.setState(Object.assign(
-					this.compile_(text.replace('\t', '   ')), {'game_name': name}), then));
+					this.compile_(text.replaceAll('\t', '   ')), {'game_name': name}), then));
 	}
 
 	componentDidMount() {
@@ -167,7 +167,7 @@ class Root extends React.Component {
 	getCurrentPlayer() {
 		const current_state_info = this.getCurrentGameStateInfo();
 		if (current_state_info)
-			return current_state_info.parameters.player;
+			return current_state_info?.parameters?.player;
 	}
 
 	withoutCoordinates(cell) {
@@ -584,7 +584,6 @@ class Root extends React.Component {
 	handleGameNameSelectChange(event) {
 		const new_game_name = event.target.value;
 		this.fetchSetConfigForGame(new_game_name, () => this.startGame());
-		
 	}
 
 	render() {
@@ -604,7 +603,7 @@ class Root extends React.Component {
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
-				<div className="gameState unselectable">{this.state.game_state.replace('_', ' ')}</div>
+				<div className="gameState unselectable">{this.state.game_state.replaceAll('_', ' ')}</div>
 			</div>
 			: null
 		}

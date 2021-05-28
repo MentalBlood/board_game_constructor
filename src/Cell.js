@@ -1,8 +1,8 @@
 'use strict';
 
 function composeExpressionWithParameters(expression, parameters) {
-	const variables_defining = Object.keys(parameters).map(name => `const ${name} = ${parameters[name]};`).join('\n');
-	return `${variables_defining};\n${expression}`;
+	const letiables_defining = Object.keys(parameters).map(name => `const ${name} = ${parameters[name]};`).join('\n');
+	return `${letiables_defining};\n${expression}`;
 }
 
 function evaluate(expression) {
@@ -41,8 +41,14 @@ const default_cell_colors = {
 }
 
 function composeZoomedGeometry(points, factor) {
-	const center = points.reduce((acc, curr) => [acc[0] + curr[0], acc[1] + curr[1]]).map(c => c / points.length);
-	return points.map(p => [center[0] + factor * (p[0] - center[0]), center[1] + factor * (p[1] - center[1])]);
+	const center = points.reduce((acc, curr) => [
+		acc[0] + curr[0],
+		acc[1] + curr[1]
+	]).map(c => c / points.length);
+	return points.map(p => [
+		center[0] + factor * (p[0] - center[0]),
+		center[1] + factor * (p[1] - center[1])
+	]);
 }
 
 function Cell(props) {
@@ -85,7 +91,7 @@ function Cell(props) {
 					'transform': `rotate(${figure_rotation_angle}deg)`
 				}}
 				src={`${resources.path}/img/figures/${player}/${figure}.svg`}
-				alt={figure} 
+				alt={`${player} ${figure}`} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 
 			: null
