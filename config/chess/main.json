@@ -13,18 +13,7 @@
 			"y": "y"
 		},
 		"colors": {
-			"white": {
-				"cell": "white",
-				"text": "black"
-			},
-			"black": {
-				"cell": "black",
-				"text": "white"
-			},
-			"undefined": {
-				"cell": "darkgrey",
-				"text": "black"
-			}
+			"fill": "((x + y) % 2) ? 'grey' : 'white'"
 		}
 	},
 	"board": [

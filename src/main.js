@@ -359,7 +359,6 @@ class Root extends React.Component {
 		const actions = [];
 
 		const destination_cell_actions = this.composeActionsForCell(cell_actions['destination'], to_cell, from_cell);
-		console.log('destination_cell_actions', cell_actions['destination'], destination_cell_actions)
 		if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
 			return [];
 		actions.push.apply(actions, destination_cell_actions);
@@ -600,7 +599,7 @@ class Root extends React.Component {
 }
 
 const rootElement = document.getElementById('root');
-const game_name = 'checkers';
+const game_name = 'chess';
 let config = undefined;
 fetch(`config/${game_name}/main.json`)
 	.then(response => response.json())

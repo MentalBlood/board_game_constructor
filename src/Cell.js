@@ -9,6 +9,10 @@ function evaluate(expression) {
 	return eval(expression);
 }
 
+function evaluateExpressionWithParameters(expression, parameters) {
+	return eval(composeExpressionWithParameters(expression, parameters));
+}
+
 function computeGeometry(cell_config, coordinates) {
 	return cell_config.geometry.map(point => point.map(c => {
 		if (typeof(c) === 'number')
@@ -48,6 +52,10 @@ function Cell(props) {
 	const screen_x = computeCoordinate(cell_config.position.x, coordinates) * size;
 	const screen_y = computeCoordinate(cell_config.position.y, coordinates) * size;
 
+	const color = cell_config.colors?.fill ? 
+		evaluateExpressionWithParameters(cell_config.colors.fill, coordinates)
+		: 'darkgrey';
+
 	return <div className={"cellWithFigure" + (selected ? " selected" : "")} style={{
 				'width': `${width}px`,
 				'height': `${height}px`,
@@ -59,7 +67,7 @@ function Cell(props) {
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
-			<polygon fill='darkgrey' points={sized_points.join(' ')}></polygon>
+			<polygon fill={color} points={sized_points.join(' ')}></polygon>
 		</svg>
 		{
 			figure ? 
