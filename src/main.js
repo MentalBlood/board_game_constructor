@@ -267,7 +267,7 @@ class Root extends React.Component {
 	}
 
 	compile() {
-		this.setState(this.compile_(JSON.parse(this.state.config_text)));
+		this.setState(this.compile_(this.state.config_text));
 	}
 
 	isVectorDividedByAnother(cell_coords_names, v, divider) {
@@ -582,6 +582,10 @@ class Root extends React.Component {
 		}
 	}
 
+	handleGameNameSelectChange() {
+
+	}
+
 	render() {
 		const unpacked_board = this.state.config ? 
 			this.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board)
@@ -604,7 +608,11 @@ class Root extends React.Component {
 				<textarea className='configText'
 					value={this.state.config_text}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
-				{/*<select value={this.state}></select>*/}
+				<select value={this.state.game_name} onChange={this.handleGameNameSelectChange}>
+					{games_available.map(name => (
+						<option key={name} value={name}>{name}</option>
+					))}
+				</select>
 				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
 			</div>
