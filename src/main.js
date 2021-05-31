@@ -337,7 +337,7 @@ class Root extends React.Component {
 				'actions': a.actions
 			});
 		}
-		console.log('matched_actions', matched_actions);
+		console.log('matched_actions', matched_actions, 'from', actions, cell, from_cell);
 		return matched_actions;
 	}
 
@@ -364,7 +364,7 @@ class Root extends React.Component {
 
 		const actions = [];
 
-		const destination_cell_actions = this.composeActionsForCell(cell_actions['destination'], to_cell, from_cell);
+		const destination_cell_actions = this.composeActionsForCell(cell_actions.destination || [], to_cell, from_cell);
 		if (destination_cell_actions.filter(a => a.actions.includes('cancel')).length)
 			return [];
 		actions.push.apply(actions, destination_cell_actions);
@@ -380,7 +380,7 @@ class Root extends React.Component {
 			const current_cell = this.getCellByCoordinates(cell_coords_names, current_cell_coordinates, this.state.board);
 			// if (!current_cell)
 			// 	continue;
-			const new_actions = this.composeActionsForCell(cell_actions['transition'], current_cell, from_cell);
+			const new_actions = this.composeActionsForCell(cell_actions.transition || [], current_cell, from_cell);
 			actions_for_transition_cells.push(...new_actions);
 		}
 		if (actions_for_transition_cells.filter(a => a.actions.includes('cancel')).length)
@@ -414,74 +414,81 @@ class Root extends React.Component {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 
 		const move = this.composeCoordinatesDelta(cell_coords_names, from_cell.coordinates, to_cell.coordinates);
-		const complex_moves_with_figure = this.state.config.complex_movement.filter(e => e[figure]);
+		const complex_moves_with_figure = 
+			this.state.config.complex_movement.filter(e => e.figures.filter(f => f.figure === figure).length);
 
 		const figure_position_absolute = from_cell.coordinates;
 
 		for (const complex_move of complex_moves_with_figure) {
 			let is_complex_move_fits = true;
 			const actions = [];
-			const figure_position_relative = complex_move[figure].relative_position || {};
-			const shift = this.composeCoordinatesDelta(cell_coords_names, figure_position_absolute, figure_position_relative);
-			
-			const complex_move_figures = Object.keys(complex_move).filter(k => 
-				(this.state.config.figures[k])
-			);
+			for (const initial_figure_info of complex_move.figures.filter(e => e.figure === figure)) {
+				console.log('initial_figure_info', initial_figure_info)
+				const figure_position_relative = initial_figure_info.relative_position || {};
+				console.log('figure_position_relative', figure_position_relative)
+				const shift = this.composeCoordinatesDelta(cell_coords_names, figure_position_absolute, figure_position_relative);
+				console.log('shift', shift)
+				
+				const complex_move_figures = Object.keys(complex_move).filter(k => 
+					this.state.config.figures[k]
+				);
 
-			for (const current_figure of complex_move_figures) {
-				const current_figure_info = complex_move[current_figure];
-				const coordinates_delta = current_figure_info.coordinates_delta;
+				for (const current_figure_info of complex_move.figures) {
+					const current_figure = current_figure_info.figure;
+					const coordinates_delta = current_figure_info.coordinates_delta || {};
 
-				let coefficient = undefined;
-				if (current_figure !== figure)
-					coefficient = 1;
-				else {
-					coefficient = this.isVectorDividedByAnother(cell_coords_names, move, coordinates_delta)?.coefficient;
-					if (!coefficient) {
+					let coefficient = undefined;
+					if (current_figure_info !== initial_figure_info)
+						coefficient = 1;
+					else {
+						coefficient = this.isVectorDividedByAnother(cell_coords_names, move, coordinates_delta)?.coefficient;
+						if (!coefficient) {
+							is_complex_move_fits = false;
+							break;
+						}
+					}
+
+					const current_figure_position_relative = current_figure_info.relative_position || {};
+					const current_figure_position_absolute = this.composeCoordinatesDelta(
+						cell_coords_names,
+						shift,
+						current_figure_position_relative);
+					
+					const current_figure_from_cell = this.getCellByCoordinates(
+						cell_coords_names, current_figure_position_absolute, this.state.board);
+					if (current_figure_from_cell?.figure !== current_figure) {
 						is_complex_move_fits = false;
 						break;
 					}
-				}
 
-				const current_figure_position_relative = current_figure_info.relative_position || {};
-				const current_figure_position_absolute = this.composeCoordinatesDelta(
-					cell_coords_names,
-					shift,
-					current_figure_position_relative);
-				
-				const current_figure_from_cell = this.getCellByCoordinates(
-					cell_coords_names, current_figure_position_absolute, this.state.board);
-				if (current_figure_from_cell?.figure !== current_figure) {
-					is_complex_move_fits = false;
-					break;
-				}
+					const current_figure_to_cell_coordinates = this.composeCellAfterSteps(
+						cell_coords_names, current_figure_from_cell.coordinates, coordinates_delta, 1);
+					const current_figure_to_cell = this.getCellByCoordinates(
+						cell_coords_names, current_figure_to_cell_coordinates, this.state.board);
+					
+					const cell_actions = current_figure_info.cell_actions || complex_move.cell_actions || {};
+					const new_actions = this.composeActionsForAvailableMove(
+						coordinates_delta, cell_actions, current_figure_from_cell, current_figure_to_cell, coefficient);
 
-				const current_figure_to_cell_coordinates = this.composeCellAfterSteps(
-					cell_coords_names, current_figure_from_cell.coordinates, coordinates_delta, 1);
-				const current_figure_to_cell = this.getCellByCoordinates(
-					cell_coords_names, current_figure_to_cell_coordinates, this.state.board);
-				
-				const cell_actions = current_figure_info.cell_actions || complex_move.cell_actions;
-				const new_actions = this.composeActionsForAvailableMove(
-					coordinates_delta, cell_actions, current_figure_from_cell, current_figure_to_cell, coefficient);
-				
-				const destination_cell_actions_number = cell_actions['destination']?.length || 0;
-				const transition_cell_actions_number = cell_actions['transition']?.length || 0;
-				if ((!new_actions) || 
-					(new_actions.length < destination_cell_actions_number + transition_cell_actions_number)) {
-					is_complex_move_fits = false;
-					break;
+					const destination_cell_actions_number = cell_actions.destination?.filter(a => !a.actions.includes('cancel')).length || 0;
+					const transition_cell_actions_number = cell_actions.transition?.filter(a => !a.actions.includes('cancel')).length || 0;
+					if ((!new_actions) || 
+						(new_actions.length < destination_cell_actions_number + transition_cell_actions_number)) {
+						console.log('!new_actions', new_actions.length, destination_cell_actions_number, transition_cell_actions_number)
+						is_complex_move_fits = false;
+						break;
+					}
+					
+					if (new_actions.filter(a => a.actions.includes('cancel')).length) {
+						is_complex_move_fits = false;
+						break;
+					}
+					
+					actions.push.apply(actions, new_actions);
 				}
-				
-				if (new_actions.filter(a => a.actions.includes('cancel')).length) {
-					is_complex_move_fits = false;
-					break;
+				if (is_complex_move_fits) {
+					return actions;
 				}
-				
-				actions.push.apply(actions, new_actions);
-			}
-			if (is_complex_move_fits) {
-				return actions;
 			}
 		}
 		return [];
@@ -502,6 +509,7 @@ class Root extends React.Component {
 		if (!this.state.config.complex_movement)
 			return [];
 		const complex_actions = this.composeActionsForComplexMove(from_cell, to_cell);
+		console.log('complex_actions', complex_actions)
 		return complex_actions;
 	}
 

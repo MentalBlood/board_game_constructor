@@ -429,19 +429,20 @@
 		}
 	},
 	"complex_movement": [{
-		"king": {
+		"figures": [{
+			"figure": "king",
 			"coordinates_delta": {
-				"x": -2
+					"x": -2
 			}
-		},
-		"rook": {
+		}, {
+			"figure": "rook",
 			"relative_position": {
 				"x": -3
 			},
 			"coordinates_delta": {
 				"x": 2
 			}
-		},
+		}],
 		"cell_actions": {
 			"destination": [{
 				"actions": ["move"],
@@ -456,37 +457,137 @@
 			}]
 		}
 	}, {
-		"king": {
-			"relative_position": {
-				"x": 0,
-				"y": 0
-			},
+		"figures": [{
+			"figure": "pawn",
 			"coordinates_delta": {
-				"x": 2
-			}
-		},
-		"rook": {
-			"relative_position": {
-				"x": 4,
-				"y": 0
+				"x": 1,
+				"y": 1
 			},
-			"coordinates_delta": {
-				"x": -3
-			}
-		},
-		"cell_actions": {
-			"destination": [{
-				"actions": ["move"],
-				"if": [{
-					"self": {
-						"moves_made": 0
-					},
-					"computed": {
-						"is_figure": false
-					}
+			"cell_actions": {
+				"destination": [{
+					"actions": ["move"],
+					"if": [{
+						"self": {
+							"player": "white"
+						}
+					}]
 				}]
-			}]
-		}
+			}
+		}, {
+			"figure": "pawn",
+			"relative_position": {
+				"x": 1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["take"],
+					"if": [{
+						"self": {
+							"player": "black"
+						}
+					}]
+				}]
+			}
+		}]
+	}, {
+		"figures": [{
+			"figure": "pawn",
+			"coordinates_delta": {
+				"x": -1,
+				"y": 1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["move"],
+					"if": [{
+						"self": {
+							"player": "white"
+						}
+					}]
+				}]
+			}
+		}, {
+			"figure": "pawn",
+			"relative_position": {
+				"x": -1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["take"],
+					"if": [{
+						"self": {
+							"player": "black"
+						}
+					}]
+				}]
+			}
+		}]
+	}, {
+		"figures": [{
+			"figure": "pawn",
+			"coordinates_delta": {
+				"x": 1,
+				"y": -1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["move"],
+					"if": [{
+						"self": {
+							"player": "black"
+						}
+					}]
+				}]
+			}
+		}, {
+			"figure": "pawn",
+			"relative_position": {
+				"x": 1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["take"],
+					"if": [{
+						"self": {
+							"player": "white"
+						}
+					}]
+				}]
+			}
+		}]
+	}, {
+		"figures": [{
+			"figure": "pawn",
+			"coordinates_delta": {
+				"x": -1,
+				"y": -1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["move"],
+					"if": [{
+						"self": {
+							"player": "black"
+						}
+					}]
+				}]
+			}
+		}, {
+			"figure": "pawn",
+			"relative_position": {
+				"x": -1
+			},
+			"cell_actions": {
+				"destination": [{
+					"actions": ["take"],
+					"if": [{
+						"self": {
+							"player": "white"
+						}
+					}]
+				}]
+			}
+		}]
 	}],
 	"initial_position": {
 		"white": {
@@ -500,14 +601,13 @@
 				{"x": 0, "y": 1},
 				{"x": 1, "y": 1},
 				{"x": 2, "y": 1},
-				{"x": 3, "y": 1},
+				{"x": 3, "y": 4},
 				{"x": 4, "y": 1},
 				{"x": 5, "y": 1},
 				{"x": 6, "y": 1},
 				{"x": 7, "y": 1}
 			],
 			"bishop": [
-				{"x": 2, "y": 0},
 				{"x": 5, "y": 0}
 			],
 			"rook": [
@@ -515,7 +615,6 @@
 				{"x": 7, "y": 0}
 			],
 			"knight": [
-				{"x": 1, "y": 0},
 				{"x": 6, "y": 0}
 			]
 		},
@@ -528,11 +627,11 @@
 			],
 			"pawn": [
 				{"x": 0, "y": 6},
-				{"x": 1, "y": 6},
-				{"x": 2, "y": 6},
+				{"x": 1, "y": 4},
+				{"x": 2, "y": 4},
 				{"x": 3, "y": 6},
-				{"x": 4, "y": 6},
-				{"x": 5, "y": 6},
+				{"x": 4, "y": 4},
+				{"x": 5, "y": 4},
 				{"x": 6, "y": 6},
 				{"x": 7, "y": 6}
 			],
