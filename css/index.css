@@ -73,13 +73,20 @@
 }
 
 .configText {
-	width: 40vw;
-	height: 60vh;
+	white-space: nowrap;
+	font-size: 1.6vmin;
+	width: 45vw;
+	height: 70vh;
 	resize: none;
 }
 
+.configsList {
+	font-size: 2vh;
+	height: 4vh;
+}
+
 button {
-	height: 8vh;
+	height: 6vh;
 	font-size: 3vh;
 }
 
