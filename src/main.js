@@ -57,18 +57,30 @@ function joinDicts(a, b) {
 	return result;
 }
 
-const games_available = [
+const configs_names_available_from_server = [
 	'chess',
 	'checkers',
 	'intellector'
-];
+]
+
+let configs = {};
+
+function loadConfigs() {
+	return Promise.all(
+		configs_names_available_from_server.map(
+			name =>
+			fetch(`config/${name}.json`)
+			.then(response => response.text())
+			.then(text => configs[name] = text)
+		)
+	);
+}
 
 class Root extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			'game_name': 'chess',
 			'board': undefined,
 			'game_state': undefined,
 			'game_statistics': {
@@ -85,7 +97,6 @@ class Root extends React.Component {
 				this.setCellByCoordinates(to_cell.coordinates, Object.assign({}, from_cell), board);
 			},
 			'move': ({from_cell, to_cell, board}) => {
-				console.log('move', from_cell, to_cell)
 				from_cell.last_move = this.state.game_statistics.current_move;
 				const from_cell_coordinates_temp = from_cell.coordinates;
 				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
@@ -144,17 +155,17 @@ class Root extends React.Component {
 		this._ref = React.createRef();
 	}
 
-	fetchSetConfigForGame(name, then) {
-		fetch(`config/${name}.json`)
-			.then(response => response.text())
-			.then(text => 
-				this.setState(Object.assign(
-					this.compile_(text.replaceAll('\t', '   ')), {'game_name': name}), then));
+	setConfigForGame(text) {
+		this.setState(this.compile_(text.replaceAll('\t', '   ')), () => this.startGame())
+	}
+
+	setLoadedConfig(name) {
+		this.setConfigForGame(configs[name]);
 	}
 
 	componentDidMount() {
 		window.addEventListener('resize', this.handleResize.bind(this));
-		this.fetchSetConfigForGame(this.state.game_name, () => this.startGame());
+		this.setLoadedConfig('chess');
 	}
 
 	handleResize() {
@@ -529,7 +540,6 @@ class Root extends React.Component {
 	}
 
 	composeStateAfterActions(state, from_cell, actions_info) {
-		console.log('composeStateAfterActions', actions_info)
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
 		}), state.board);
@@ -613,7 +623,33 @@ class Root extends React.Component {
 
 	handleGameNameSelectChange(event) {
 		const new_game_name = event.target.value;
-		this.fetchSetConfigForGame(new_game_name, () => this.startGame());
+		this.setLoadedConfig(new_game_name, () => this.startGame());
+	}
+
+	getSaveName() {
+		const today = new Date();
+		const current_date = `${today.getFullYear()}_${(today.getMonth() + 1)}_${today.getDate()}`;
+		const current_time = `${today.getHours()}_${today.getMinutes()}_${today.getSeconds()}`;
+		return `${this.state.config.name}_config-${current_date}-${current_time}.json`;
+	}
+
+	downloadConfig() {
+		const data_text = this.state.config_text;
+		const name = this.getSaveName();
+		downloadFile(name, data_text);
+	}
+
+	uploadConfig() {
+		uploadFile('json', jsonText => {
+			const new_config = JSON.parse(jsonText);
+			const name = new_config.name
+			if (!name) {
+				console.log('no game name found in config (field "name")')
+				return;
+			}
+			configs[name] = jsonText;
+			this.setLoadedConfig(name);
+		});
 	}
 
 	render() {
@@ -641,17 +677,23 @@ class Root extends React.Component {
 				<textarea className='configText'
 					value={this.state.config_text}
 					onChange={this.hangleConfigTextChange.bind(this)}></textarea>
-				<select value={this.state.game_name} onChange={this.handleGameNameSelectChange.bind(this)}>
-					{games_available.map(name => (
+				<select className='configsList' 
+					value={this.state.config?.name} 
+					onChange={this.handleGameNameSelectChange.bind(this)}>
+					{Object.keys(configs).map(name => (
 						<option key={name} value={name}>{name}</option>
 					))}
 				</select>
+				<button className="uploadConfigButton unselectable"
+					onClick={this.uploadConfig.bind(this)}>upload config</button>
 				<button className='compileButton unselectable'
 					onClick={this.compile.bind(this)}>compile</button>
+				<button className="downloadConfigButton unselectable"
+					onClick={this.downloadConfig.bind(this)}>download config</button>
 			</div>
 		</div>);
 	}
 }
 
 const rootElement = document.getElementById('root');
-ReactDOM.render(React.createElement(Root), rootElement);
+loadConfigs().then(() => ReactDOM.render(React.createElement(Root), rootElement));

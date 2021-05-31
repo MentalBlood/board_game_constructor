@@ -74,24 +74,20 @@
 
 .configText {
 	width: 40vw;
-	height: 80vh;
-	outline: none;
+	height: 60vh;
 	resize: none;
 }
 
-.compileButton {
-	border: none;
-	height: 10vh;
-	font-size: 4vh;
+button {
+	height: 8vh;
+	font-size: 3vh;
 }
 
-.compileButton:hover {
-	background-color: green;
-	transform: scale(0.9);
+button:hover {
+	transform: scale(0.94);
 	transition-duration: 0.3s;
 }
 
-.compileButton:not(:hover) {
-	background-color: limegreen;
+button:not(:hover) {
 	transition-duration: 0.3s;
 }

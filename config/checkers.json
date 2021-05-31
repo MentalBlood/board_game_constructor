@@ -1,4 +1,5 @@
 {
+	"name": "checkers",
 	"players": ["white", "black"],
 	"cell": {
 		"coordinates_names": ["x", "y"],
