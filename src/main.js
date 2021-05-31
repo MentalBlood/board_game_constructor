@@ -71,6 +71,7 @@ class Root extends React.Component {
 			'game_name': 'chess',
 			'board': undefined,
 			'game_state': undefined,
+			'current_move': undefined,
 			'selected_cell': undefined,
 			'config_text': undefined,
 			'config': undefined
@@ -106,7 +107,14 @@ class Root extends React.Component {
 
 		this.conditions_types = {
 			'exists': entities_list => Boolean(entities_list.length)
-		}
+		};
+
+		this.state_effects = {
+			'next_move': state => {
+				state.current_move += 1;
+				return state;
+			}
+		};
 
 		this.state_data_getters = {
 			'check_win': board => {
@@ -124,8 +132,9 @@ class Root extends React.Component {
 		this.game_state_passiveness_by_type = {
 			'move': 'active',
 			'check_win': 'passive',
+			'next_move': 'passive',
 			'end': 'active'
-		}
+		};
 
 		this._ref = React.createRef();
 	}
@@ -148,7 +157,10 @@ class Root extends React.Component {
 	}
 
 	startGame() {
-		this.setGameState(this.state.config.initial_game_state);
+		this.setState(state => ({
+			'current_move': 1,
+			'game_state': this.state.config.initial_game_state
+		}));
 	}
 
 	setGameState(game_state) {
@@ -423,15 +435,10 @@ class Root extends React.Component {
 			let is_complex_move_fits = true;
 			const actions = [];
 			for (const initial_figure_info of complex_move.figures.filter(e => e.figure === figure)) {
-				console.log('initial_figure_info', initial_figure_info)
 				const figure_position_relative = initial_figure_info.relative_position || {};
-				console.log('figure_position_relative', figure_position_relative)
 				const shift = this.composeCoordinatesDelta(cell_coords_names, figure_position_absolute, figure_position_relative);
-				console.log('shift', shift)
 				
-				const complex_move_figures = Object.keys(complex_move).filter(k => 
-					this.state.config.figures[k]
-				);
+				const complex_move_figures = Object.keys(complex_move).filter(k => this.state.config.figures[k]);
 
 				for (const current_figure_info of complex_move.figures) {
 					const current_figure = current_figure_info.figure;
@@ -474,7 +481,6 @@ class Root extends React.Component {
 					const transition_cell_actions_number = cell_actions.transition?.filter(a => !a.actions.includes('cancel')).length || 0;
 					if ((!new_actions) || 
 						(new_actions.length < destination_cell_actions_number + transition_cell_actions_number)) {
-						console.log('!new_actions', new_actions.length, destination_cell_actions_number, transition_cell_actions_number)
 						is_complex_move_fits = false;
 						break;
 					}
@@ -509,7 +515,6 @@ class Root extends React.Component {
 		if (!this.state.config.complex_movement)
 			return [];
 		const complex_actions = this.composeActionsForComplexMove(from_cell, to_cell);
-		console.log('complex_actions', complex_actions)
 		return complex_actions;
 	}
 
@@ -549,7 +554,9 @@ class Root extends React.Component {
 		const current_state_info = this.getGameStateInfo(current_state);
 		if (typeof(current_state_info.next) === 'string')
 			return current_state_info.next;
-		const data = this.state_data_getters[current_state_info.type](this.state.board);
+		const data = this.state_data_getters[current_state_info.type] ? 
+			this.state_data_getters[current_state_info.type](this.state.board)
+			undefined;
 		for (const branch of current_state_info.next) {
 			for (const conditions of branch['if'])
 				if (matchDict({ 'result': data }, conditions))
@@ -558,16 +565,20 @@ class Root extends React.Component {
 	}
 
 	setNextGameState() {
-		const current_state = this.state.game_state;
-		let next_state = this.composeNextGameState(current_state);
+		const current_game_state = this.state.game_state;
+		let component_state = Object.assign({}, this.state);
+		let next_game_state = this.composeNextGameState(current_game_state);
 		while (true) {
-			const info = this.getGameStateInfo(next_state);
+			const info = this.getGameStateInfo(next_game_state);
 			const type = info.type;
 			if (this.game_state_passiveness_by_type[type] != 'passive')
 				break;
-			next_state = this.composeNextGameState(next_state);
+			if (this.state_effects[type])
+				component_state = this.state_effects[type](component_state);
+			next_game_state = this.composeNextGameState(next_game_state);
 		}
-		this.setGameState(next_state);
+		this.setState(component_state);
+		this.setGameState(next_game_state);
 	}
 
 	handleSelectCell(cell) {
@@ -611,7 +622,7 @@ class Root extends React.Component {
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
-				<div className="gameState unselectable">{this.state.game_state.replaceAll('_', ' ')}</div>
+				<div className="gameState unselectable">{this.state.current_move} {this.state.game_state.replaceAll('_', ' ')}</div>
 			</div>
 			: null
 		}

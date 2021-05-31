@@ -707,7 +707,7 @@
 				"player": "black"
 			},
 			"next": [{
-				"state": "white_move",
+				"state": "next_move",
 				"if": [{
 					"result": false
 				}]
@@ -717,6 +717,10 @@
 					"result": true
 				}]
 			}]
+		},
+		"next_move": {
+			"type": "next_move", 
+			"next": "white_move"
 		},
 		"white_won": {
 			"type": "end"
