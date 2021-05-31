@@ -71,7 +71,9 @@ class Root extends React.Component {
 			'game_name': 'chess',
 			'board': undefined,
 			'game_state': undefined,
-			'current_move': undefined,
+			'game_statistics': {
+				'current_move': undefined
+			},
 			'selected_cell': undefined,
 			'config_text': undefined,
 			'config': undefined
@@ -83,6 +85,8 @@ class Root extends React.Component {
 				this.setCellByCoordinates(to_cell.coordinates, Object.assign({}, from_cell), board);
 			},
 			'move': ({from_cell, to_cell, board}) => {
+				console.log('move', from_cell, to_cell)
+				from_cell.last_move = this.state.game_statistics.current_move;
 				const from_cell_coordinates_temp = from_cell.coordinates;
 				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
 				this.setCellEmpty(from_cell_coordinates_temp, board);
@@ -96,9 +100,10 @@ class Root extends React.Component {
 		};
 
 		this.values_computers = {
-			'is_cell': (cell, from_cell) => Boolean(cell),
-			'is_enemy': (cell, from_cell) => (cell?.player !== undefined) && (cell?.player != from_cell?.player),
-			'is_figure': (cell, from_cell) => cell?.player !== undefined
+			'is_cell': ({cell}) => Boolean(cell),
+			'is_enemy': ({cell, from_cell}) => (cell?.player !== undefined) && (cell?.player != from_cell?.player),
+			'is_figure': ({cell}) => cell?.player !== undefined,
+			'moves_after_last_move': ({from_cell}) => this.state.game_statistics.current_move - from_cell.last_move
 		};
 
 		this.entities_getters = {
@@ -110,9 +115,9 @@ class Root extends React.Component {
 		};
 
 		this.state_effects = {
-			'next_move': state => {
-				state.current_move += 1;
-				return state;
+			'next_move': game_statistics => {
+				game_statistics.current_move += 1;
+				return game_statistics;
 			}
 		};
 
@@ -158,7 +163,9 @@ class Root extends React.Component {
 
 	startGame() {
 		this.setState(state => ({
-			'current_move': 1,
+			'game_statistics': {
+				'current_move': 1
+			},
 			'game_state': this.state.config.initial_game_state
 		}));
 	}
@@ -248,6 +255,7 @@ class Root extends React.Component {
 					this.setCellByCoordinates(coordinates, {
 						'coordinates': coordinates,
 						'moves_made': 0,
+						'last_move': 0,
 						'player': player,
 						'figure': figure
 					}, result_board, cell_coords_names);
@@ -312,7 +320,7 @@ class Root extends React.Component {
 		const result = {};
 		for (const name of values_names)
 			if (this.values_computers[name])
-				result[name] = this.values_computers[name](cell, from_cell);
+				result[name] = this.values_computers[name]({'cell': cell, 'from_cell': from_cell});
 		return result;
 	}
 
@@ -325,10 +333,12 @@ class Root extends React.Component {
 			if (a['if']) {
 				let some_conditions_fit = false;
 				for (const conditions of a['if']) {
-					if (conditions.self) {
+					if (conditions.statistics)
+						if (!matchDict(this.state.statistics, conditions.statistics))
+							continue;
+					if (conditions.self)
 						if (!matchDict(from_cell, conditions.self))
 							continue;
-					}
 					if (conditions.target)
 						if (!matchDict(cell, conditions.target))
 							continue;
@@ -349,7 +359,7 @@ class Root extends React.Component {
 				'actions': a.actions
 			});
 		}
-		console.log('matched_actions', matched_actions, 'from', actions, cell, from_cell);
+		// console.log('matched_actions', matched_actions, 'from', actions, cell, from_cell);
 		return matched_actions;
 	}
 
@@ -413,7 +423,7 @@ class Root extends React.Component {
 			const coefficient = this.isVectorDividedByAnother(cell_coords_names, move, available_move)?.coefficient;
 			if (!coefficient)
 				continue;
-			const cell_actions = joinDicts(available_move.cell_actions, figure_info.cell_actions);
+			const cell_actions = joinDicts(available_move.cell_actions || {}, figure_info.cell_actions || {});
 			const actions = this.composeActionsForAvailableMove(available_move, cell_actions, from_cell, to_cell, coefficient);
 			return actions;
 		}
@@ -473,7 +483,7 @@ class Root extends React.Component {
 					const current_figure_to_cell = this.getCellByCoordinates(
 						cell_coords_names, current_figure_to_cell_coordinates, this.state.board);
 					
-					const cell_actions = current_figure_info.cell_actions || complex_move.cell_actions || {};
+					const cell_actions = joinDicts(current_figure_info.cell_actions || {}, complex_move.cell_actions || {});
 					const new_actions = this.composeActionsForAvailableMove(
 						coordinates_delta, cell_actions, current_figure_from_cell, current_figure_to_cell, coefficient);
 
@@ -519,6 +529,7 @@ class Root extends React.Component {
 	}
 
 	composeStateAfterActions(state, from_cell, actions_info) {
+		console.log('composeStateAfterActions', actions_info)
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
 		}), state.board);
@@ -556,7 +567,7 @@ class Root extends React.Component {
 			return current_state_info.next;
 		const data = this.state_data_getters[current_state_info.type] ? 
 			this.state_data_getters[current_state_info.type](this.state.board)
-			undefined;
+			: undefined;
 		for (const branch of current_state_info.next) {
 			for (const conditions of branch['if'])
 				if (matchDict({ 'result': data }, conditions))
@@ -565,20 +576,20 @@ class Root extends React.Component {
 	}
 
 	setNextGameState() {
-		const current_game_state = this.state.game_state;
-		let component_state = Object.assign({}, this.state);
-		let next_game_state = this.composeNextGameState(current_game_state);
+		const current_state = this.state.game_state;
+		let game_statistics = this.state.game_statistics;
+		let next_state = this.composeNextGameState(current_state);
 		while (true) {
-			const info = this.getGameStateInfo(next_game_state);
+			const info = this.getGameStateInfo(next_state);
 			const type = info.type;
 			if (this.game_state_passiveness_by_type[type] != 'passive')
 				break;
 			if (this.state_effects[type])
-				component_state = this.state_effects[type](component_state);
-			next_game_state = this.composeNextGameState(next_game_state);
+				game_statistics = this.state_effects[type](game_statistics);
+			next_state = this.composeNextGameState(next_state);
 		}
-		this.setState(component_state);
-		this.setGameState(next_game_state);
+		this.setState({'game_statistics': game_statistics});
+		this.setGameState(next_state);
 	}
 
 	handleSelectCell(cell) {

@@ -458,6 +458,34 @@
 		}
 	}, {
 		"figures": [{
+			"figure": "king",
+			"coordinates_delta": {
+					"x": 2
+			}
+		}, {
+			"figure": "rook",
+			"relative_position": {
+				"x": 4
+			},
+			"coordinates_delta": {
+				"x": -3
+			}
+		}],
+		"cell_actions": {
+			"destination": [{
+				"actions": ["move"],
+				"if": [{
+					"self": {
+						"moves_made": 0
+					},
+					"computed": {
+						"is_figure": false
+					}
+				}]
+			}]
+		}
+	}, {
+		"figures": [{
 			"figure": "pawn",
 			"coordinates_delta": {
 				"x": 1,
@@ -483,7 +511,14 @@
 					"actions": ["take"],
 					"if": [{
 						"self": {
-							"player": "black"
+							"player": "black",
+							"moves_made": 1,
+							"coordinates": {
+								"y": 4
+							}
+						},
+						"computed": {
+							"moves_after_last_move": 1
 						}
 					}]
 				}]
@@ -516,7 +551,14 @@
 					"actions": ["take"],
 					"if": [{
 						"self": {
-							"player": "black"
+							"player": "black",
+							"moves_made": 1,
+							"coordinates": {
+								"y": 4
+							}
+						},
+						"computed": {
+							"moves_after_last_move": 1
 						}
 					}]
 				}]
@@ -549,7 +591,14 @@
 					"actions": ["take"],
 					"if": [{
 						"self": {
-							"player": "white"
+							"player": "white",
+							"moves_made": 1,
+							"coordinates": {
+								"y": 3
+							}
+						},
+						"computed": {
+							"moves_after_last_move": 0
 						}
 					}]
 				}]
@@ -582,7 +631,14 @@
 					"actions": ["take"],
 					"if": [{
 						"self": {
-							"player": "white"
+							"player": "white",
+							"moves_made": 1,
+							"coordinates": {
+								"y": 3
+							}
+						},
+						"computed": {
+							"moves_after_last_move": 0
 						}
 					}]
 				}]
@@ -601,13 +657,14 @@
 				{"x": 0, "y": 1},
 				{"x": 1, "y": 1},
 				{"x": 2, "y": 1},
-				{"x": 3, "y": 4},
+				{"x": 3, "y": 1},
 				{"x": 4, "y": 1},
 				{"x": 5, "y": 1},
 				{"x": 6, "y": 1},
 				{"x": 7, "y": 1}
 			],
 			"bishop": [
+				{"x": 2, "y": 0},
 				{"x": 5, "y": 0}
 			],
 			"rook": [
@@ -615,6 +672,7 @@
 				{"x": 7, "y": 0}
 			],
 			"knight": [
+				{"x": 1, "y": 0},
 				{"x": 6, "y": 0}
 			]
 		},
@@ -627,11 +685,11 @@
 			],
 			"pawn": [
 				{"x": 0, "y": 6},
-				{"x": 1, "y": 4},
-				{"x": 2, "y": 4},
+				{"x": 1, "y": 6},
+				{"x": 2, "y": 6},
 				{"x": 3, "y": 6},
-				{"x": 4, "y": 4},
-				{"x": 5, "y": 4},
+				{"x": 4, "y": 6},
+				{"x": 5, "y": 6},
 				{"x": 6, "y": 6},
 				{"x": 7, "y": 6}
 			],
