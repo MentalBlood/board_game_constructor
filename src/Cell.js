@@ -67,6 +67,11 @@ function Cell(props) {
 	Object.keys(colors).map(type => 
 		colors[type] = evaluateExpressionWithParameters(colors[type], coordinates));
 
+	let figure_image = undefined;
+	if (resources?.images?.figures)
+		if (resources?.images?.figures[player])
+			figure_image = resources?.images?.figures[player][figure];
+
 	return <div className="cellWithFigure" style={{
 				'width': `${width}px`,
 				'height': `${height}px`,
@@ -90,7 +95,7 @@ function Cell(props) {
 			<img className='figure' style={{
 					'transform': `rotate(${figure_rotation_angle}deg)`
 				}}
-				src={`${resources.path}/img/figures/${player}/${figure}.svg`}
+				src={figure_image}
 				alt={`${player} ${figure}`} 
 				draggable={false}
 				onClick={handleSelectThisCell}></img> 

@@ -145,7 +145,7 @@ class Root extends React.Component {
 	}
 
 	fetchSetConfigForGame(name, then) {
-		fetch(`config/${name}/main.json`)
+		fetch(`config/${name}.json`)
 			.then(response => response.text())
 			.then(text => 
 				this.setState(Object.assign(
@@ -626,7 +626,7 @@ class Root extends React.Component {
 			this.state.config ? 
 			<div className="gameUI">
 				<Board
-					resources={{'path': `config/${this.state.game_name}`}}
+					resources={this.state.config.resources}
 					board={unpacked_board}
 					rotation_angle={board_rotation_angle}
 					cell_config={this.state.config.cell}

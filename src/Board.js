@@ -57,7 +57,7 @@ function Board(props) {
 			board.map(
 				cell =>
 				<Cell
-					key={Object.values(cell.coordinates).concat([cell.figure, resources.path]).join('_')}
+					key={Object.values(cell.coordinates).concat([cell.figure]).join('_')}
 					{...cell}
 					resources={resources}
 					cell_config={cell_config}

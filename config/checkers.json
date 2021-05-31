@@ -236,6 +236,20 @@
 			]
 		}
 	},
+	"resources": {
+		"images": {
+			"figures": {
+				"white": {
+					"king": "https://svgshare.com/i/Xit.svg",
+					"man": "https://svgshare.com/i/Xjr.svg"
+				},
+				"black": {
+					"king": "https://svgshare.com/i/XjX.svg",
+					"man": "https://svgshare.com/i/Xhj.svg"
+				}
+			}
+		}
+	},
 	"win_conditions": {
 		"white": [{
 			"entity": "cell",
