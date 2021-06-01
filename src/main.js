@@ -498,15 +498,8 @@ class Root extends React.Component {
 					const new_actions = this.composeActionsForAvailableMove(
 						coordinates_delta, cell_actions, current_figure_from_cell, current_figure_to_cell, coefficient);
 
-					const destination_cell_actions_number = cell_actions.destination?.filter(a => !a.actions.includes('cancel')).length || 0;
-					const transition_cell_actions_number = cell_actions.transition?.filter(a => !a.actions.includes('cancel')).length || 0;
-					if ((!new_actions) || 
-						(new_actions.length < destination_cell_actions_number + transition_cell_actions_number)) {
-						is_complex_move_fits = false;
-						break;
-					}
-					
-					if (new_actions.filter(a => a.actions.includes('cancel')).length) {
+					if (new_actions.filter(a => a.actions.includes('cancel')).length ||
+						!new_actions.filter(a => !a.actions.includes('cancel')).length) {
 						is_complex_move_fits = false;
 						break;
 					}
