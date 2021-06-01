@@ -433,7 +433,7 @@
 		"figures": [{
 			"figure": "king",
 			"coordinates_delta": {
-					"x": -2
+				"x": -2
 			}
 		}, {
 			"figure": "rook",
