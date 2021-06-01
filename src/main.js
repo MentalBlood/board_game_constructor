@@ -140,8 +140,10 @@ class Root extends React.Component {
 					const entities = this.entities_getters[c.entity](board);
 					const filtered_entities = entities.filter(e => matchDict(e, c.filter));
 					const result = this.conditions_types[c.type](filtered_entities);
-					return result === c.result;
+					if (result === c.result)
+						return true;
 				}
+				return false;
 			}
 		};
 
