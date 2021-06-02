@@ -235,6 +235,12 @@ Available *actions* are:
 * *match* means, in simple words, that *conditions* are a part of target object (for the curious: of course, it supports nesting (that is, the so-called deep match))
 * `computed` conditions are object which keys are built-in functions names and values are values that this functions should return
 
+Built-in functions for `computed` property are:
+
+* `is_figure` -- is there a figure on the cell
+* `is_enemy` -- is there an enemy figure on the cell
+* `is_cell` -- is there a cell
+
 *cell object* always have the following properties:
 
 * properties with names of dimensions and values of coordinates (`"x": 1` for example)
