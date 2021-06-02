@@ -125,140 +125,160 @@
 			}
 		},
 		"pawn": {
-			"movement": {
-				"white": [{
-					"y": 2,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["move"],
-							"if": [{
-								"self": {
-									"moves_made": 0
-								},
-								"computed": {
-									"is_figure": false
-								}
-							}]
-						}],
-						"transition": [{
-							"actions": ["cancel"],
-							"if": [{
-								"computed": {
-									"is_figure": true
-								}
-							}, {
-								"computed": {
-									"is_cell": false
-								}
-							}]
+			"movement": [{
+				"y": 2,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["move"],
+						"if": [{
+							"self": {
+								"player": "white",
+								"moves_made": 0
+							},
+							"computed": {
+								"is_figure": false
+							}
 						}]
-					}
-				}, {
-					"y": 1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["move"],
-							"if": [{
-								"computed": {
-									"is_figure": false
-								}
-							}]
+					}],
+					"transition": [{
+						"actions": ["cancel"],
+						"if": [{
+							"self": {
+								"player": "white"
+							},
+							"computed": {
+								"is_figure": true
+							}
+						}, {
+							"computed": {
+								"is_cell": false
+							}
 						}]
-					}
-				}, {
-					"x": 1,
-					"y": 1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["take", "move"],
-							"if": [{
-								"computed": {
-									"is_enemy": true
-								}
-							}]
+					}]
+				}
+			}, {
+				"y": 1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["move"],
+						"if": [{
+							"self": {
+								"player": "white"
+							},
+							"computed": {
+								"is_figure": false
+							}
 						}]
-					}
-				}, {
-					"x": -1,
-					"y": 1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["take", "move"],
-							"if": [{
-								"computed": {
-									"is_enemy": true
-								}
-							}]
+					}]
+				}
+			}, {
+				"x": 1,
+				"y": 1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["take", "move"],
+						"if": [{
+							"self": {
+								"player": "white"
+							},
+							"computed": {
+								"is_enemy": true
+							}
 						}]
-					}
-				}],
-				"black": [{
-					"y": -2,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["move"],
-							"if": [{
-								"self": {
-									"moves_made": 0
-								},
-								"computed": {
-									"is_figure": false
-								}
-							}]
-						}],
-						"transition": [{
-							"actions": ["cancel"],
-							"if": [{
-								"computed": {
-									"is_figure": true
-								}
-							}, {
-								"computed": {
-									"is_cell": false
-								}
-							}]
+					}]
+				}
+			}, {
+				"x": -1,
+				"y": 1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["take", "move"],
+						"if": [{
+							"self": {
+								"player": "white"
+							},
+							"computed": {
+								"is_enemy": true
+							}
 						}]
-					}
-				}, {
-					"y": -1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["move"],
-							"if": [{
-								"computed": {
-									"is_figure": false
-								}
-							}]
+					}]
+				}
+			}, {
+				"y": -2,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["move"],
+						"if": [{
+							"self": {
+								"player": "black",
+								"moves_made": 0
+							},
+							"computed": {
+								"is_figure": false
+							}
 						}]
-					}
-				}, {
-					"x": 1,
-					"y": -1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["take", "move"],
-							"if": [{
-								"computed": {
-									"is_enemy": true
-								}
-							}]
+					}],
+					"transition": [{
+						"actions": ["cancel"],
+						"if": [{
+							"computed": {
+								"is_figure": true
+							}
+						}, {
+							"computed": {
+								"is_cell": false
+							}
 						}]
-					}
-				}, {
-					"x": -1,
-					"y": -1,
-					"cell_actions": {
-						"destination": [{
-							"actions": ["take", "move"],
-							"if": [{
-								"computed": {
-									"is_enemy": true
-								}
-							}]
+					}]
+				}
+			}, {
+				"y": -1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["move"],
+						"if": [{
+							"self": {
+								"player": "black"
+							},
+							"computed": {
+								"is_figure": false
+							}
 						}]
-					}
-				}]
-			}
+					}]
+				}
+			}, {
+				"x": 1,
+				"y": -1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["take", "move"],
+						"if": [{
+							"self": {
+								"player": "black"
+							},
+							"computed": {
+								"is_enemy": true
+							}
+						}]
+					}]
+				}
+			}, {
+				"x": -1,
+				"y": -1,
+				"cell_actions": {
+					"destination": [{
+						"actions": ["take", "move"],
+						"if": [{
+							"self": {
+								"player": "black"
+							},
+							"computed": {
+								"is_enemy": true
+							}
+						}]
+					}]
+				}
+			}]
 		},
 		"knight": {
 			"movement": [{
