@@ -192,7 +192,7 @@ class Root extends React.Component {
 		const coordinates_names = this.state.config.cell.coordinates_names;
 		const result = {};
 		for (const name of coordinates_names)
-			result[name] = cell[name];
+			result[name] = cell[name] || 0;
 		return result;
 	}
 
@@ -626,20 +626,36 @@ class Root extends React.Component {
 		const result = [];
 		const figure_info = this.state.config.figures[cell.figure];
 		const coordinates_names = this.state.config.cell.coordinates_names;
+
+		const possible_moves_from_simple = figure_info.movement;
+		const possible_moves_from_complex = this.state.config.complex_movement.map(
+			m => 
+			m.figures.filter(
+				f => 
+				f.figure === cell.figure
+			)
+		).flat();
+		const possible_moves = [...possible_moves_from_simple, ...possible_moves_from_complex];
 		
-		for (const move of figure_info.movement) {
-			const coordinates_delta = this.composeDictWithCoordinates(move);
+		for (const move of possible_moves) {
+			const coordinates_delta = move.coordinates_delta || this.composeDictWithCoordinates(move);
+			const is_repeat = move.repeat || coordinates_delta.repeat;
+			const is_also_reversed = move.also_reversed || coordinates_delta.also_reversed;
 			const to_cells_coordinates = [];
-			for (let steps_number = 1; move.repeat || steps_number == 1; steps_number++) {
+			for (let steps_number = 1; is_repeat || (steps_number == 1); steps_number++) {
+				
 				const cell_after_steps_forward = this.composeCellAfterSteps(
 					coordinates_names, cell.coordinates, coordinates_delta, steps_number);
-				const cell_after_steps_backward = move.also_reversed ? this.composeCellAfterSteps(
+				
+				const cell_after_steps_backward = is_also_reversed ? this.composeCellAfterSteps(
 					coordinates_names, cell.coordinates, coordinates_delta, -steps_number) 
 					: undefined;
+				
 				const new_cells = [
 					cell_after_steps_forward,
 					cell_after_steps_backward
 				].filter(c => c && this.isCellWithinBoard(c));
+				
 				if (!new_cells.length)
 					break;
 				to_cells_coordinates.push.apply(to_cells_coordinates, new_cells);
