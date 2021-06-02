@@ -369,3 +369,78 @@ If an figure located on the cell, *cell object* also have the following properti
 }
 ```
 
+
+
+---
+
+
+
+`game_states` -- an object that describes game states and transitions between them
+
+* keys are game states names
+* values are game states descriptions
+
+```json
+"game_states": {
+    "white_move": {
+        "type": "move",
+        "parameters": {
+            "player": "white"
+        },
+        "next": "check_white_win"
+    },
+    "black_move": {
+        "type": "move",
+        "parameters": {
+            "player": "black"
+        },
+        "next": "check_black_win"
+    },
+    "check_white_win": {
+        "type": "check_win",
+        "parameters": {
+            "player": "white"
+        },
+        "next": [{
+            "state": "black_move",
+            "if": [{
+                "result": false
+            }]
+        }, {
+            "state": "white_won",
+            "if": [{
+                "result": true
+            }]
+        }]
+    },
+    ...
+}
+```
+
+* each game state have `type`
+* all game states except those of type `end` have property `next`
+* some game states have `parameters`
+
+Available game state types and corresponding parameters are:
+
+* `move` -- when player `parameters.player` should make a move
+* `check_win` -- when computer should check if player `parameters.player` won
+* `next_move` -- when computer should increase current move number (for example, in chess `next_move` triggered after black moved)
+* `end` -- when game end
+
+Property `next` is a list that defines which state and under what conditions will be next
+
+* `next[].state` -- name of next state
+* `next[].if` -- conditions; processed just like conditions for movements
+
+
+
+---
+
+
+
+`initial_game_state` -- name of initial game state
+
+```json
+"initial_game_state": "white_move"
+```
