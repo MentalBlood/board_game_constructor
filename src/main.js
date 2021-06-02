@@ -188,7 +188,7 @@ class Root extends React.Component {
 			this.setState(state => ({'game_state': game_state}));
 	}
 
-	composeCellWithoutData(cell) {
+	composeDictWithCoordinates(cell) {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 		const result = {};
 		for (const name of cell_coords_names)
@@ -202,7 +202,7 @@ class Root extends React.Component {
 			return current_state_info?.parameters?.player;
 	}
 
-	withoutCoordinates(cell) {
+	composeDictWithoutCoordinates(cell) {
 		const result = Object.assign({}, cell);
 		delete result.coordinates;
 		return result;
@@ -597,7 +597,28 @@ class Root extends React.Component {
 		this.setGameState(next_state);
 	}
 
+	getAvailableMovesFromCell(cell) {
+		if (!cell.figure)
+			return [];
+		const result = [];
+		const figure_info = this.state.config.figures[cell.figure];
+		const cell_coords_names = this.state.config.cell.coordinates_names;
+		for (const move of figure_info.movement) {
+			const coordinates_delta = this.composeDictWithCoordinates(move);
+			const to_cell_coordinates = this.composeCellAfterSteps(
+				cell_coords_names, cell.coordinates, coordinates_delta, 1);
+			const to_cell = this.getCellByCoordinates(cell_coords_names, to_cell_coordinates, this.state.board);
+			if (!to_cell)
+				continue;
+			const actions = this.composeActionsForMove(cell, to_cell);
+			if (actions.length > 0)
+				result.push.apply(result, actions);
+		}
+		return result;
+	}
+
 	handleSelectCell(cell) {
+		console.log(this.getAvailableMovesFromCell(cell));
 		const from_cell = this.state.selected_cell;
 		if (from_cell) {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
