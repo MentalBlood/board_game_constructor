@@ -605,11 +605,17 @@ class Root extends React.Component {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 		for (const move of figure_info.movement) {
 			const coordinates_delta = this.composeDictWithCoordinates(move);
-			const to_cells_coordinates = [this.composeCellAfterSteps(
-				cell_coords_names, cell.coordinates, coordinates_delta, 1)];
-			if (move.also_reversed)
-				to_cells_coordinates.push(this.composeCellAfterSteps(
-					cell_coords_names, cell.coordinates, coordinates_delta, -1));
+			const to_cells_coordinates = [];
+			if (move.repeat) {
+				console.log('repeat')
+				for (let i = 0; i < 5; i++) {
+					to_cells_coordinates.push(this.composeCellAfterSteps(
+						cell_coords_names, cell.coordinates, coordinates_delta, i));
+					if (move.also_reversed)
+						to_cells_coordinates.push(this.composeCellAfterSteps(
+							cell_coords_names, cell.coordinates, coordinates_delta, -i));
+				}
+			}
 			for (const c of to_cells_coordinates) {
 				const to_cell = this.getCellByCoordinates(cell_coords_names, c, this.state.board);
 				if (!to_cell)
