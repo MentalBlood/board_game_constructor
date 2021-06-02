@@ -133,9 +133,9 @@ class Root extends React.Component {
 		};
 
 		this.state_data_getters = {
-			'check_win': board => {
-				const current_player = this.getCurrentPlayer();
-				const win_conditions = this.state.config.win_conditions[current_player];
+			'check_win': ({board, parameters}) => {
+				const player = parameters.player;
+				const win_conditions = this.state.config.win_conditions[player];
 				for (const c of win_conditions) {
 					const entities = this.entities_getters[c.entity](board);
 					const filtered_entities = entities.filter(e => matchDict(e, c.filter));
@@ -581,7 +581,10 @@ class Root extends React.Component {
 		if (typeof(current_state_info.next) === 'string')
 			return current_state_info.next;
 		const data = this.state_data_getters[current_state_info.type] ? 
-			this.state_data_getters[current_state_info.type](this.state.board)
+			this.state_data_getters[current_state_info.type]({
+				'board': this.state.board,
+				'parameters': current_state_info.parameters 
+			})
 			: undefined;
 		for (const branch of current_state_info.next) {
 			for (const conditions of branch['if'])
