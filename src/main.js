@@ -605,20 +605,24 @@ class Root extends React.Component {
 		const cell_coords_names = this.state.config.cell.coordinates_names;
 		for (const move of figure_info.movement) {
 			const coordinates_delta = this.composeDictWithCoordinates(move);
-			const to_cell_coordinates = this.composeCellAfterSteps(
-				cell_coords_names, cell.coordinates, coordinates_delta, 1);
-			const to_cell = this.getCellByCoordinates(cell_coords_names, to_cell_coordinates, this.state.board);
-			if (!to_cell)
-				continue;
-			const actions = this.composeActionsForMove(cell, to_cell);
-			if (actions.length > 0)
-				result.push.apply(result, actions);
+			const to_cells_coordinates = [this.composeCellAfterSteps(
+				cell_coords_names, cell.coordinates, coordinates_delta, 1)];
+			if (move.also_reversed)
+				to_cells_coordinates.push(this.composeCellAfterSteps(
+					cell_coords_names, cell.coordinates, coordinates_delta, -1));
+			for (const c of to_cells_coordinates) {
+				const to_cell = this.getCellByCoordinates(cell_coords_names, c, this.state.board);
+				if (!to_cell)
+					continue;
+				const actions = this.composeActionsForMove(cell, to_cell);
+				if (actions.length > 0)
+					result.push.apply(result, actions);
+			}
 		}
 		return result;
 	}
 
 	handleSelectCell(cell) {
-		console.log(this.getAvailableMovesFromCell(cell));
 		const from_cell = this.state.selected_cell;
 		if (from_cell) {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
@@ -626,14 +630,27 @@ class Root extends React.Component {
 				const new_state = this.composeStateAfterActions(this.state, from_cell, actions_for_move);
 				this.setState(new_state, () => this.setNextGameState());
 			}
-			this.setState({'selected_cell': undefined});
+			this.setState({
+				'selected_cell': undefined,
+				'highlighted_cells': {}
+			});
 		}
 		else {
 			const selected_cell_player = cell.player;
 			if (!selected_cell_player)
 				return;
-			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters?.player))
-				this.setState({'selected_cell': cell});
+			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters?.player)) {
+				const available_moves = this.getAvailableMovesFromCell(cell);
+				const available_moves_cells_coordinates = available_moves.map(m => m.target_cell.coordinates);
+				this.setState({
+					'selected_cell': cell,
+					'highlighted_cells': available_moves_cells_coordinates.reduce((acc, curr) => {
+						const coordinates_string = Object.values(curr).join('_');
+						acc[coordinates_string] = true;
+						return acc;
+					}, {})
+				});
+			}
 		}
 	}
 
@@ -684,6 +701,7 @@ class Root extends React.Component {
 					cell_config={this.state.config.cell}
 					handleSelectCell={this.handleSelectCell.bind(this)}
 					selected_cell={this.state.selected_cell}
+					highlighted_cells={this.state.highlighted_cells || {}}
 					cell_coords_names={this.state.config.cell.coordinates_names}></Board>
 				<div className="gameState unselectable">{this.state.current_move} {this.state.game_state.replaceAll('_', ' ')}</div>
 			</div>

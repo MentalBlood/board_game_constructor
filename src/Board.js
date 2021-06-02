@@ -34,7 +34,7 @@ function computeBoardSize(cell_config, board) {
 }
 
 function Board(props) {
-	const {cell_config, resources, board, rotation_angle, handleSelectCell, selected_cell, figure_image} = props;
+	const {cell_config, resources, board, rotation_angle, handleSelectCell, selected_cell, highlighted_cells, figure_image} = props;
 	const required_board_size = {
 		'width': window.innerWidth * 0.46,
 		'height': window.innerHeight * 0.86
@@ -64,7 +64,8 @@ function Board(props) {
 					size={cell_size}
 					figure_rotation_angle={-rotation_angle}
 					handleSelectThisCell={() => handleSelectCell(cell)}
-					selected={isObjectsEqual(selected_cell, cell)}>
+					selected={isObjectsEqual(selected_cell, cell)}
+					highlighted={highlighted_cells[Object.values(cell.coordinates).join('_')]}>
 				</Cell>)
 		}</div>
 	);

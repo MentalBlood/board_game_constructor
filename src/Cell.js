@@ -37,7 +37,8 @@ function computeCellScreenSize(points) {
 
 const default_cell_colors = {
 	'fill': '"darkgrey"',
-	'selector': '"skyblue"'
+	'selector': '"skyblue"',
+	'highlighter': '"lightgreen"'
 }
 
 function composeZoomedGeometry(points, factor) {
@@ -52,11 +53,11 @@ function composeZoomedGeometry(points, factor) {
 }
 
 function Cell(props) {
-	const {cell_config, resources, coordinates, size, figure_rotation_angle, figure, player, selected, handleSelectThisCell} = props;
+	const {cell_config, resources, coordinates, size, figure_rotation_angle, figure, player, selected, highlighted, handleSelectThisCell} = props;
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
-	const zoomed_sized_points = selected ? composeZoomedGeometry(sized_points, 0.85) : sized_points;
+	const zoomed_sized_points = (selected || highlighted) ? composeZoomedGeometry(sized_points, 0.85) : sized_points;
 
 	const {width, height} = computeCellScreenSize(sized_points);
 
@@ -86,6 +87,9 @@ function Cell(props) {
 			{
 				selected ? 
 				<polygon fill={colors.selector} points={sized_points.join(' ')}></polygon>
+				: 
+				highlighted ?
+				<polygon fill={colors.highlighter} points={sized_points.join(' ')}></polygon>
 				: null
 			}
 			<polygon fill={colors.fill} points={zoomed_sized_points.join(' ')}></polygon>
