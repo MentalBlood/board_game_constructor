@@ -534,10 +534,10 @@ class Root extends React.Component {
 		return complex_actions;
 	}
 
-	composeStateAfterActions(state, from_cell, actions_info) {
+	composeBoardAfterActions(board, from_cell, actions_info) {
 		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
-		}), state.board);
+		}), board);
 		for (const info of actions_info) {
 			for (const a of info.actions) {
 				let name, parameters;
@@ -551,11 +551,11 @@ class Root extends React.Component {
 						'from_cell': info.from_cell,
 						'to_cell': info.target_cell, 
 						'parameters': parameters, 
-						'board': state.board
+						'board': board
 					});
 			}
 		}
-		return state;
+		return board;
 	}
 
 	getCurrentGameStateInfo() {
@@ -627,8 +627,8 @@ class Root extends React.Component {
 		if (from_cell) {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
 			if (actions_for_move.length > 0) {
-				const new_state = this.composeStateAfterActions(this.state, from_cell, actions_for_move);
-				this.setState(new_state, () => this.setNextGameState());
+				const new_board = this.composeBoardAfterActions(this.state.board, from_cell, actions_for_move);
+				this.setState({'board': new_board}, () => this.setNextGameState());
 			}
 			this.setState({
 				'selected_cell': undefined,
