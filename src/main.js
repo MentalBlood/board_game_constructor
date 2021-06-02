@@ -285,15 +285,25 @@ class Root extends React.Component {
 
 	compile_(new_config_text) {
 		const new_config = JSON.parse(new_config_text);
+		const coords_names = new_config.cell.coordinates_names;
+
 		return {
 			'config': new_config,
 			'config_text': new_config_text,
 			'game_state': new_config.initial_game_state,
 			'position': new_config.initial_position,
 			'board': this.composeBoardWithFigures(
-				new_config.cell.coordinates_names,
+				coords_names,
 				new_config.initial_position,
 				new_config.board.cells
+			),
+			'cell_coordinates_maxes': dictFromTwoLists(
+				coords_names,
+				coords_names.map(name => Math.max(...new_config.board.cells.map(c => c[name])))
+			),
+			'cell_coordinates_mins': dictFromTwoLists(
+				coords_names,
+				coords_names.map(name => Math.min(...new_config.board.cells.map(c => c[name])))
 			)
 		};
 	}
@@ -597,25 +607,41 @@ class Root extends React.Component {
 		this.setGameState(next_state);
 	}
 
+	isCellWithinBoard(coordinates) {
+		return Object.entries(coordinates).every(
+			([name, value]) => (
+				(value <= this.state.cell_coordinates_maxes[name]) && 
+				(value >= this.state.cell_coordinates_mins[name])
+			)
+		);
+	}
+
 	getAvailableMovesFromCell(cell) {
 		if (!cell.figure)
 			return [];
+		
 		const result = [];
 		const figure_info = this.state.config.figures[cell.figure];
 		const cell_coords_names = this.state.config.cell.coordinates_names;
+		
 		for (const move of figure_info.movement) {
 			const coordinates_delta = this.composeDictWithCoordinates(move);
 			const to_cells_coordinates = [];
-			if (move.repeat) {
-				console.log('repeat')
-				for (let i = 0; i < 5; i++) {
-					to_cells_coordinates.push(this.composeCellAfterSteps(
-						cell_coords_names, cell.coordinates, coordinates_delta, i));
-					if (move.also_reversed)
-						to_cells_coordinates.push(this.composeCellAfterSteps(
-							cell_coords_names, cell.coordinates, coordinates_delta, -i));
-				}
+			for (let steps_number = 1; move.repeat || steps_number == 1; steps_number++) {
+				const cell_after_steps_forward = this.composeCellAfterSteps(
+					cell_coords_names, cell.coordinates, coordinates_delta, steps_number);
+				const cell_after_steps_backward = move.also_reversed ? this.composeCellAfterSteps(
+					cell_coords_names, cell.coordinates, coordinates_delta, -steps_number) 
+					: undefined;
+				const new_cells = [
+					cell_after_steps_forward,
+					cell_after_steps_backward
+				].filter(c => c && this.isCellWithinBoard(c));
+				if (!new_cells.length)
+					break;
+				to_cells_coordinates.push.apply(to_cells_coordinates, new_cells);
 			}
+
 			for (const c of to_cells_coordinates) {
 				const to_cell = this.getCellByCoordinates(cell_coords_names, c, this.state.board);
 				if (!to_cell)
