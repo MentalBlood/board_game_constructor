@@ -237,6 +237,7 @@ Available *actions* are:
 
 Built-in functions for `computed` property are:
 
+* `moves_after_last_move` -- moves pass after last move of figure **located on source cell**
 * `is_figure` -- is there a figure on the cell
 * `is_enemy` -- is there an enemy figure on the cell
 * `is_cell` -- is there a cell
