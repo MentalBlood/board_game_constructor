@@ -7,6 +7,7 @@ class Root extends React.Component {
 	}
 
 	componentDidMount() {
+		window.addEventListener('resize', () => this.forceUpdate());
 		this.game = new Game(this.setState.bind(this));
 	}
 
