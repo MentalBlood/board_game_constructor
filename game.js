@@ -68,6 +68,7 @@ class Game {
 				'current_move': undefined
 			},
 			'selected_cell': undefined,
+			'highlighted_cells': undefined,
 			'config_text': undefined,
 			'config': undefined
 		}
@@ -99,11 +100,16 @@ class Game {
 	}
 
 	startGame() {
+		console.log('startGame')
+		const initial_game_state = this.state.config.initial_game_state;
+		const player = this.getPlayer(initial_game_state);
+
 		this.setState(state => ({
 			'game_statistics': {
 				'current_move': 1
 			},
-			'game_state': this.state.config.initial_game_state
+			'game_state': initial_game_state,
+			'highlighted_cells': this.composeHighlightedCells(undefined, player)
 		}));
 	}
 
@@ -120,10 +126,14 @@ class Game {
 		return result;
 	}
 
+	getPlayer(game_state) {
+		const info = this.getGameStateInfo(game_state);
+		if (info)
+			return info?.parameters?.player;
+	}
+
 	getCurrentPlayer() {
-		const current_state_info = this.getCurrentGameStateInfo();
-		if (current_state_info)
-			return current_state_info?.parameters?.player;
+		return this.getPlayer(this.state.game_state);
 	}
 
 	composeDictWithoutCoordinates(cell) {
@@ -470,8 +480,12 @@ class Game {
 		return board;
 	}
 
+	getGameStateInfo(game_state) {
+		return this.state.config.game_states[game_state];
+	}
+
 	getCurrentGameStateInfo() {
-		return this.state.config.game_states[this.state.game_state];
+		return this.getGameStateInfo(this.state.game_state);
 	}
 
 	getGameStateInfo(game_state) {
@@ -523,7 +537,7 @@ class Game {
 		);
 	}
 
-	getAvailableMovesFromCell(cell) {
+	composeAvailableMovesFromCell(cell) {
 		if (!cell.figure)
 			return [];
 		
@@ -532,13 +546,15 @@ class Game {
 		const coordinates_names = this.state.config.cell.coordinates_names;
 
 		const possible_moves_from_simple = figure_info.movement;
-		const possible_moves_from_complex = this.state.config.complex_movement.map(
-			m => 
-			m.figures.filter(
-				f => 
-				f.figure === cell.figure
-			)
-		).flat();
+		const possible_moves_from_complex = this.state.config.complex_movement ?
+			this.state.config.complex_movement.map(
+				m => 
+				m.figures.filter(
+					f => 
+					f.figure === cell.figure
+				)
+			).flat()
+			: [];
 		const possible_moves = [...possible_moves_from_simple, ...possible_moves_from_complex];
 		
 		for (const move of possible_moves) {
@@ -580,7 +596,32 @@ class Game {
 		return result;
 	}
 
+	composeAvailableMoves(player) {
+		const coordinates_names = this.state.config.cell.coordinates_names;
+		const unpacked_board = composeUnpackedBoard(this.state.board, coordinates_names);
+		return unpacked_board
+			.filter(c => c.figure && (c.player === player))
+			.map(c => this.composeAvailableMovesFromCell(c).map(move => ({...move, ...{'from_cell': c}})))
+			.flat();
+	}
+
+	composeHighlightedCells(selected_cell, player) {
+		console.log('composeHighlightedCells', Object.keys(this.state.config.figures))
+		const cells = selected_cell ?
+			this.composeAvailableMovesFromCell(selected_cell)
+				.map(move => move.to_cell.coordinates)
+			:
+			this.composeAvailableMoves(player)
+				.map(move => move.from_cell.coordinates);
+		
+		const result = {};
+		for (const c of cells)
+			result[Object.values(c).join('_')] = true;
+		return result;
+	}
+
 	handleSelectCell(cell) {
+		console.log()
 		const from_cell = this.state.selected_cell;
 		if (from_cell) {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
@@ -590,7 +631,7 @@ class Game {
 			}
 			this.setState({
 				'selected_cell': undefined,
-				'highlighted_cells': {}
+				'highlighted_cells': this.composeHighlightedCells(undefined, this.getCurrentPlayer())
 			});
 		}
 		else {
@@ -598,15 +639,9 @@ class Game {
 			if (!selected_cell_player)
 				return;
 			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters?.player)) {
-				const available_moves = this.getAvailableMovesFromCell(cell);
-				const available_moves_cells_coordinates = available_moves.map(m => m.to_cell.coordinates);
 				this.setState({
 					'selected_cell': cell,
-					'highlighted_cells': available_moves_cells_coordinates.reduce((acc, curr) => {
-						const coordinates_string = Object.values(curr).join('_');
-						acc[coordinates_string] = true;
-						return acc;
-					}, {})
+					'highlighted_cells': this.composeHighlightedCells(cell)
 				});
 			}
 		}

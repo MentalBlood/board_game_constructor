@@ -7,7 +7,7 @@ class Root extends React.Component {
 	}
 
 	componentDidMount() {
-		this.game = new Game(state => this.setState.bind(this)(state));
+		this.game = new Game(this.setState.bind(this));
 	}
 
 	render() {
