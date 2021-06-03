@@ -264,24 +264,51 @@
 			}
 		},
 		"progressor": {
-			"movement": {
-				"white": [{
-					"x": 1
-				}, {
-					"y": 1
-				}, {
-					"x": -1,
-					"y": 1
-				}],
-				"black": [{
-					"x": -1
-				}, {
-					"y": -1
-				}, {
-					"x": 1,
-					"y": -1
-				}]
-			},
+			"movement": [{
+				"x": 1,
+				"if": {
+					"self": {
+						"player": "white"
+					}
+				}
+			}, {
+				"y": 1,
+				"if": {
+					"self": {
+						"player": "white"
+					}
+				}
+			}, {
+				"x": -1,
+				"y": 1,
+				"if": {
+					"self": {
+						"player": "white"
+					}
+				}
+			},{
+				"x": -1,
+				"if": {
+					"self": {
+						"player": "black"
+					}
+				}
+			}, {
+				"y": -1,
+				"if": {
+					"self": {
+						"player": "black"
+					}
+				}
+			}, {
+				"x": 1,
+				"y": -1,
+				"if": {
+					"self": {
+						"player": "black"
+					}
+				}
+			}],
 			"cell_actions": {
 				"destination": [{
 					"actions": ["take", "move"],
