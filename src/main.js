@@ -14,7 +14,7 @@ class Root extends React.Component {
 		if (!this.game)
 			return null;
 		const unpacked_board = this.state.config ? 
-			this.game.composeUnpackedBoard(this.state.config.cell.coordinates_names, this.state.board)
+			composeUnpackedBoard(this.state.board, this.state.config.cell.coordinates_names)
 			: undefined;
 		const board_rotation_angle = this.state.config?.board.rotation_angle[this.game.getCurrentPlayer()];
 		return (<div className='app' ref={this._ref}>

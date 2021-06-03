@@ -72,69 +72,6 @@ class Game {
 			'config': undefined
 		}
 
-		this.actions = {
-			'swap': ({from_cell, to_cell, board}) => {
-				this.setCellByCoordinates(from_cell.coordinates, Object.assign({}, to_cell), board);
-				this.setCellByCoordinates(to_cell.coordinates, Object.assign({}, from_cell), board);
-			},
-			'move': ({from_cell, to_cell, board}) => {
-				from_cell.last_move = this.state.game_statistics.current_move;
-				const from_cell_coordinates_temp = from_cell.coordinates;
-				this.setCellByCoordinates(to_cell.coordinates, from_cell, board);
-				this.setCellEmpty(from_cell_coordinates_temp, board);
-			},
-			'take': ({from_cell, to_cell, board}) => {
-				this.setCellEmpty(to_cell.coordinates, board);
-			},
-			'replace': ({from_cell, board, parameters}) => {
-				this.setCellByCoordinates(from_cell.coordinates, Object.assign(from_cell, {'figure': parameters.new_figure}), board);
-			}
-		};
-
-		this.values_computers = {
-			'is_cell': ({cell}) => Boolean(cell),
-			'is_enemy': ({cell, from_cell}) => (cell?.player !== undefined) && (cell?.player != from_cell?.player),
-			'is_figure': ({cell}) => cell?.player !== undefined,
-			'moves_after_last_move': ({from_cell}) => this.state.game_statistics.current_move - from_cell.last_move
-		};
-
-		this.entities_getters = {
-			'cell': board => this.composeUnpackedBoard(this.state.config.cell.coordinates_names, board)
-		};
-
-		this.conditions_types = {
-			'exists': entities_list => Boolean(entities_list.length)
-		};
-
-		this.state_effects = {
-			'next_move': game_statistics => {
-				game_statistics.current_move += 1;
-				return game_statistics;
-			}
-		};
-
-		this.state_data_getters = {
-			'check_win': ({board, parameters}) => {
-				const player = parameters.player;
-				const win_conditions = this.state.config.win_conditions[player];
-				for (const c of win_conditions) {
-					const entities = this.entities_getters[c.entity](board);
-					const filtered_entities = entities.filter(e => matchDict(e, c.filter));
-					const result = this.conditions_types[c.type](filtered_entities);
-					if (result === c.result)
-						return true;
-				}
-				return false;
-			}
-		};
-
-		this.game_state_passiveness_by_type = {
-			'move': 'active',
-			'check_win': 'passive',
-			'next_move': 'passive',
-			'end': 'active'
-		};
-
 		this.callback_after_set_state(this.state);
 		this.setLoadedConfig('chess');
 	}
@@ -200,30 +137,6 @@ class Game {
 		this.setState({'config_text': new_text});
 	}
 
-	setCellByCoordinates(coordinates, element_to_insert, board, coordinates_names) {
-		coordinates_names = coordinates_names || this.state.config.cell.coordinates_names;
-		const coordinates_list = coordinates_names.map(name => coordinates[name]);
-		let current_level = board;
-		for (let i = 0; i < coordinates_list.length - 1; i++) {
-			const c = coordinates_list[i];
-			if (!current_level[c])
-				current_level[c] = {};
-			current_level = current_level[c]
-		}
-		const c = coordinates_list[coordinates_list.length - 1];
-		if (typeof(element_to_insert) == 'function')
-			element_to_insert = element_to_insert(current_level[c]);
-		if (current_level[c]?.coordinates)
-			current_level[c] = Object.assign({}, element_to_insert, {coordinates: current_level[c].coordinates});
-		else
-			current_level[c] = Object.assign({}, element_to_insert);
-	}
-
-	setCellEmpty(coordinates, board, coordinates_names) {
-		coordinates_names = coordinates_names || this.state.config.cell.coordinates_names;
-		this.setCellByCoordinates(coordinates, {'coordinates': coordinates}, board, coordinates_names);
-	}
-
 	getCellByCoordinates_(coordinates_names, coordinates, board) {
 		const coordinates_list = coordinates_names.map(name => coordinates[name]);
 		let current_level = board;
@@ -248,11 +161,11 @@ class Game {
 	composeBoardWithFigures(coordinates_names, position, board_config) {
 		const result_board = {};
 		for (const cell_coordinates of board_config)
-			this.setCellEmpty(cell_coordinates, result_board, coordinates_names);
+			setCellEmpty(cell_coordinates, result_board, coordinates_names);
 		for (const player in position) {
 			for (const figure in position[player]) {
 				for (const coordinates of position[player][figure]) {
-					this.setCellByCoordinates(coordinates, {
+					setCellByCoordinates(coordinates, {
 						'coordinates': coordinates,
 						'moves_made': 0,
 						'last_move': 0,
@@ -263,11 +176,6 @@ class Game {
 			}
 		}
 		return result_board;
-	}
-
-	composeUnpackedBoard(coordinates_names, board_with_figures) {
-		const keys_and_elements = getAllElementsWithDepth(this.state.board, coordinates_names.length - 1);
-		return keys_and_elements.map(k_e => k_e.element);
 	}
 
 	compile_(new_config_text) {
@@ -329,8 +237,12 @@ class Game {
 	composeComputedValues(values_names, cell, from_cell) {
 		const result = {};
 		for (const name of values_names)
-			if (this.values_computers[name])
-				result[name] = this.values_computers[name]({'cell': cell, 'from_cell': from_cell});
+			if (library.values_computers[name])
+				result[name] = library.values_computers[name]({
+					'cell': cell, 
+					'from_cell': from_cell, 
+					'game_statistics': this.state.game_statistics
+				});
 		return result;
 	}
 
@@ -532,9 +444,10 @@ class Game {
 	}
 
 	composeBoardAfterActions(board, from_cell, actions_info) {
-		this.setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
+		const coordinates_names = this.state.config.cell.coordinates_names;
+		setCellByCoordinates(from_cell.coordinates, c => Object.assign(c, {
 			'moves_made': c.moves_made + 1
-		}), board);
+		}), board, coordinates_names);
 		for (const info of actions_info) {
 			for (const a of info.actions) {
 				let name, parameters;
@@ -543,12 +456,14 @@ class Game {
 					parameters = a.parameters;
 				} else
 					name = a;
-				if (this.actions[name])
-					this.actions[name]({
+				if (library.actions[name])
+					library.actions[name]({
 						'from_cell': info.from_cell,
 						'to_cell': info.target_cell, 
 						'parameters': parameters, 
-						'board': board
+						'board': board,
+						'coordinates_names': coordinates_names,
+						'game_statistics': this.state.game_statistics
 					});
 			}
 		}
@@ -567,10 +482,12 @@ class Game {
 		const current_state_info = this.getGameStateInfo(current_state);
 		if (typeof(current_state_info.next) === 'string')
 			return current_state_info.next;
-		const data = this.state_data_getters[current_state_info.type] ? 
-			this.state_data_getters[current_state_info.type]({
+		const data = library.state_data_getters[current_state_info.type] ? 
+			library.state_data_getters[current_state_info.type]({
 				'board': this.state.board,
-				'parameters': current_state_info.parameters 
+				'coordinates_names': this.state.config.cell.coordinates_names,
+				'parameters': current_state_info.parameters, 
+				'win_conditions': this.state.config.win_conditions
 			})
 			: undefined;
 		for (const branch of current_state_info.next) {
@@ -587,10 +504,10 @@ class Game {
 		while (true) {
 			const info = this.getGameStateInfo(next_state);
 			const type = info.type;
-			if (this.game_state_passiveness_by_type[type] != 'passive')
+			if (library.game_state_passiveness_by_type[type] != 'passive')
 				break;
-			if (this.state_effects[type])
-				game_statistics = this.state_effects[type](game_statistics);
+			if (library.state_effects[type])
+				game_statistics = library.state_effects[type](game_statistics);
 			next_state = this.composeNextGameState(next_state);
 		}
 		this.setState({'game_statistics': game_statistics});
