@@ -57,7 +57,6 @@ function Cell(props) {
 
 	const points = computeGeometry(cell_config, coordinates);
 	const sized_points = composeSizedPoints(points, size);
-	const zoomed_sized_points = (selected || highlighted) ? composeZoomedGeometry(sized_points, 0.85) : sized_points;
 
 	const {width, height} = computeCellScreenSize(sized_points);
 
@@ -84,15 +83,15 @@ function Cell(props) {
 			}}
 			xmlns="http://www.w3.org/2000/svg" version="1.1"
 			onClick={handleSelectThisCell}>
+			<polygon fill={colors.fill} points={sized_points.join(' ')}></polygon>
 			{
 				selected ? 
-				<polygon fill={colors.selector} points={sized_points.join(' ')}></polygon>
+				<polygon style={{opacity: 0.6}} fill={colors.selector} points={sized_points.join(' ')}></polygon>
 				: 
 				highlighted ?
-				<polygon fill={colors.highlighter} points={sized_points.join(' ')}></polygon>
+				<polygon style={{opacity: 0.6}} fill={colors.highlighter} points={sized_points.join(' ')}></polygon>
 				: null
 			}
-			<polygon fill={colors.fill} points={zoomed_sized_points.join(' ')}></polygon>
 		</svg>
 		{
 			figure ? 

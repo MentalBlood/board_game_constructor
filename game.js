@@ -561,7 +561,7 @@ class Game {
 			const is_repeat = move.repeat || coordinates_delta.repeat;
 			const is_also_reversed = move.also_reversed || coordinates_delta.also_reversed;
 			const to_cells_coordinates = [];
-			for (let steps_number = 1; is_repeat || (steps_number == 1); steps_number++) {
+			for (let steps_number = 1; is_repeat || (steps_number === 1); steps_number++) {
 				
 				const cell_after_steps_forward = this.composeCellAfterSteps(
 					coordinates_names, cell.coordinates, coordinates_delta, steps_number);
