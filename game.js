@@ -100,7 +100,6 @@ class Game {
 	}
 
 	startGame() {
-		console.log('startGame')
 		const initial_game_state = this.state.config.initial_game_state;
 		const player = this.getPlayer(initial_game_state);
 
@@ -606,7 +605,6 @@ class Game {
 	}
 
 	composeHighlightedCells(selected_cell, player) {
-		console.log('composeHighlightedCells', Object.keys(this.state.config.figures))
 		const cells = selected_cell ?
 			this.composeAvailableMovesFromCell(selected_cell)
 				.map(move => move.to_cell.coordinates)
@@ -621,7 +619,6 @@ class Game {
 	}
 
 	handleSelectCell(cell) {
-		console.log()
 		const from_cell = this.state.selected_cell;
 		if (from_cell) {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
@@ -637,6 +634,8 @@ class Game {
 		else {
 			const selected_cell_player = cell.player;
 			if (!selected_cell_player)
+				return;
+			if (!this.state.highlighted_cells[Object.values(cell.coordinates).join('_')])
 				return;
 			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters?.player)) {
 				this.setState({
