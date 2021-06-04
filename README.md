@@ -14,9 +14,9 @@ User friendly engine for creating custom board games
 
 ## Config file structure description
 
-Root structure is key-value. Fields are (descriptions separated by horizontal lines):
+Root structure is key-value. Fields and their examples are (descriptions separated by horizontal lines):
 
-`name` -- game name
+`name` &#8211; game name
 
 ```json
 "name": "intellector"
@@ -28,7 +28,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`players` -- list of players names
+`players` &#8211; list of players names
 
 ```json
 "players": ["white", "black"]
@@ -40,7 +40,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`cell` -- object that defines cells space and how to display them
+`cell` &#8211; object that defines cells space and how to display them
 
 
 
@@ -48,7 +48,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`cell.coordinates_names` -- names of dimensions of space where cells are located
+`cell.coordinates_names` &#8211; names of dimensions of space where cells are located
 
 
 
@@ -56,16 +56,16 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`cell.geometry` -- list of (x, y)-points, defines polygon that is drawn as cell
+`cell.geometry` &#8211; list of (x, y)-points, defines polygon that is drawn as cell
 
 ```json
 "geometry": [
-	[0.9,	0.39],
-	[0.675,	0.78],
-	[0.225,	0.78],
-	[0,		0.39],
-	[0.225,	0],
-	[0.675,	0]
+    [0.9,	0.39],
+    [0.675,	0.78],
+    [0.225,	0.78],
+    [0,		0.39],
+    [0.225,	0],
+    [0.675,	0]
 ]
 ```
 
@@ -75,12 +75,12 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`cell.position` -- object that defines how cell screen coordinates are calculated, each coordinate defined by JavaScript expression
+`cell.position` &#8211; object that defines how cell screen coordinates are calculated, each coordinate defined by JavaScript expression
 
 ```json
 "position": {
-	"x": "x * 0.675",
-	"y": "(y + x / 2) * 0.78"
+    "x": "x * 0.675",
+    "y": "(y + x / 2) * 0.78"
 }
 ```
 
@@ -90,11 +90,11 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`cell.colors` -- object that defines cells colors, each color defined by JavaScript expression
+`cell.colors` &#8211; object that defines cells colors, each color defined by JavaScript expression
 
 ```json
 "colors": {
-	"fill": "((!(x % 3) && !((x + y) % 3)) || (!((x + 1) % 3) && !((x + y + 2) % 3)) || (!((x + 2) % 3) && !((x + y + 1) % 3))) ? 'grey' : 'white'"
+    "fill": "((!(x % 3) && !((x + y) % 3)) || (!((x + 1) % 3) && !((x + y + 2) % 3)) || (!((x + 2) % 3) && !((x + y + 1) % 3))) ? 'grey' : 'white'"
 }
 ```
 
@@ -104,20 +104,20 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`board` -- object that defines which cells are in board and how to rotate board accordingly to current move's player
+`board` &#8211; object that defines which cells are in board and how to rotate board accordingly to current move's player
 
 ```json
 "board": {
-	"rotation_angle": {
-		"white": 180,
-		"black": 0
-	},
-	"cells": [
-		{"x": 0, "y": 0},
-		{"x": 0, "y": 1},
-		{"x": 0, "y": 2},
+    "rotation_angle": {
+        "white": 180,
+        "black": 0
+    },
+    "cells": [
+        {"x": 0, "y": 0},
+        {"x": 0, "y": 1},
+        {"x": 0, "y": 2},
         ...
-	]
+    ]
 }
 ```
 
@@ -127,7 +127,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`figures` -- object that defines how figures can action
+`figures` &#8211; object that defines how figures can action
 
 ```json
 "figures": {
@@ -143,7 +143,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`figures.some_figure_name` -- object that defines how `some_figure_name` can action
+`figures.some_figure_name` &#8211; object that defines how `some_figure_name` can action
 
 ```json
 "intellector": {
@@ -158,7 +158,7 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`figures.some_figure_name.movement` -- list of available *movements*
+`figures.some_figure_name.movement` &#8211; list of available *movements*
 
 ```json
 "movement": [{
@@ -176,14 +176,14 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 
 
-`figures.some_figure_name.movement[]` -- *movement* description
+`figures.some_figure_name.movement[]` &#8211; *movement* description
 
 * keys which are dimensions names (`"x"`, `"y"` for example), describes move coordinates delta
 * `cell_actions` is an object that describes *actions sets*, which should be done if move fits coordinates delta
 * *actions set* can be of type `destination` or `transition`
-* `destination` means that *action* processed for destination cell
-* `transition` means that *action set* processed for cells that the figure should *transit* in order to reach destination
-* cell treats as *transition* for some *action set* if figure can reach it using this and only this *action set*'s coordinates delta
+* `destination` means that *actions set* processed for destination cell
+* `transition` means that *actions set* processed for cells that the figure should *transit* in order to reach destination
+* cell treats as *transition* for some *action set* if figure can reach it using only coordinates delta from this *actions set*
 
 ```json
 {
@@ -220,10 +220,10 @@ Root structure is key-value. Fields are (descriptions separated by horizontal li
 
 Available *actions* are:
 
-* `move` -- sets target cell figure to source cell figure, then clears source cell
-* `take` -- clears target cell
-* `swap` -- swaps target cell figure with source cell figure
-* `cancel` -- cancels move
+* `move` &#8211; sets target cell figure to source cell figure, then clears source cell
+* `take` &#8211; clears target cell
+* `swap` &#8211; swaps target cell figure with source cell figure
+* `cancel` &#8211; cancels move
 
 *Conditions sets* for each *actions set* can be provided, defined as list by key `if`
 
@@ -248,9 +248,9 @@ Built-in functions for `computed` property are:
 
 If an figure located on the cell, *cell object* also have the following properties:
 
-* `figure` -- name of figure that is located on this cell
-* `player` -- name of player to which belongs this figure
-* `moves_made` -- amount of moves made by this figure
+* `figure` &#8211; name of figure that is located on this cell
+* `player` &#8211; name of player to which belongs this figure
+* `moves_made` &#8211; amount of moves made by this figure
 
 `cell_actions` can be defined both into `figures.some_figure_name` (*global*) and `figures.some_figure_name.movement[]` (*action-specific*). They are merged when it comes to deal with concrete *movement*.
 
@@ -260,12 +260,12 @@ If an figure located on the cell, *cell object* also have the following properti
 
 
 
-`complex_movement` -- list of *complex movements*
+`complex_movement` &#8211; list of *complex movements*
 
 *complex movement* is an object that can have the following properties:
 
-* `figures` -- list of *movements*, where each *movement* supplemented by properties `figure` (figure name) and `relative_position` (object like `{"x": 1}`)
-* `cell_actions` -- described in the end of the section above
+* `figures` &#8211; list of *movements*, where each *movement* supplemented by properties `figure` (figure name) and `relative_position` (object like `{"x": 1}`)
+* `cell_actions` &#8211; described in the end of the section above
 
 ```json
 "complex_movement": [{
@@ -307,7 +307,7 @@ If an figure located on the cell, *cell object* also have the following properti
 
 
 
-`resources` -- resources for game (currently only figures images links)
+`resources` &#8211; resources for game (currently only figures images links)
 
 ```json
 "resources": {
@@ -340,7 +340,7 @@ If an figure located on the cell, *cell object* also have the following properti
 
 
 
-`win_conditions` -- an object that defines win conditions for each player separately
+`win_conditions` &#8211; an object that defines win conditions for each player separately
 
 * keys are players names
 * values are lists of *filter-check conditions*
@@ -348,10 +348,10 @@ If an figure located on the cell, *cell object* also have the following properti
 
 *filter-check condition* is consists of 4 properties:
 
-* `entity` -- entities type to filter (currently only `cell` type available)
-* `filter` -- object to *match* entity to it to pass filter
-* `type` -- check function name (currently only `exists` function available)
-* `result` -- the result the function should return to *filter-check condition* to be considered true
+* `entity` &#8211; entities type to filter (currently only `cell` type available)
+* `filter` &#8211; object to *match* entity to it to pass filter
+* `type` &#8211; check function name (currently only `exists` function available)
+* `result` &#8211; the result the function should return to *filter-check condition* to be considered true
 
 ```json
 "win_conditions": {

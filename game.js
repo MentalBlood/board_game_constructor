@@ -491,13 +491,13 @@ class Game {
 		return this.state.config.game_states[game_state];
 	}
 
-	composeNextGameState(current_state) {
-		const current_state_info = this.getGameStateInfo(current_state);
+	composeNextGameState(current_game_state, board) {
+		const current_state_info = this.getGameStateInfo(current_game_state);
 		if (typeof(current_state_info.next) === 'string')
 			return current_state_info.next;
 		const data = library.state_data_getters[current_state_info.type] ? 
 			library.state_data_getters[current_state_info.type]({
-				'board': this.state.board,
+				'board': board,
 				'coordinates_names': this.state.config.cell.coordinates_names,
 				'parameters': current_state_info.parameters, 
 				'win_conditions': this.state.config.win_conditions
@@ -510,21 +510,21 @@ class Game {
 		}
 	}
 
-	setNextGameState() {
-		const current_state = this.state.game_state;
-		let game_statistics = this.state.game_statistics;
-		let next_state = this.composeNextGameState(current_state);
+	composeNextActiveGameState(current_game_state, game_statistics, board) {
+		let next_game_state = this.composeNextGameState(current_game_state);
 		while (true) {
-			const info = this.getGameStateInfo(next_state);
+			const info = this.getGameStateInfo(next_game_state);
 			const type = info.type;
-			if (library.game_state_passiveness_by_type[type] != 'passive')
+			if (library.game_state_passiveness_by_type[type] === 'active')
 				break;
 			if (library.state_effects[type])
 				game_statistics = library.state_effects[type](game_statistics);
-			next_state = this.composeNextGameState(next_state);
+			next_game_state = this.composeNextGameState(next_game_state, board);
 		}
-		this.setState({'game_statistics': game_statistics});
-		this.setGameState(next_state);
+		return {
+			'game_statistics': game_statistics,
+			'game_state': next_game_state
+		};
 	}
 
 	isCellWithinBoard(coordinates) {
@@ -624,7 +624,11 @@ class Game {
 			const actions_for_move = this.composeActionsForMove(from_cell, cell);
 			if (actions_for_move.length > 0) {
 				const new_board = this.composeBoardAfterActions(this.state.board, from_cell, actions_for_move);
-				this.setState({'board': new_board}, () => this.setNextGameState());
+				const new_state = {
+					...{'board': new_board}, 
+					...this.composeNextActiveGameState(this.state.game_state, this.state.game_statistics, new_board)
+				};
+				this.setState(new_state);
 			}
 			this.setState({
 				'selected_cell': undefined,
