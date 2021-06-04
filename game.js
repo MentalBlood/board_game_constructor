@@ -108,7 +108,7 @@ class Game {
 				'current_move': 1
 			},
 			'game_state': initial_game_state,
-			'highlighted_cells': this.composeHighlightedCells(undefined, player)
+			'highlighted_cells': this.composeHighlightedCells(undefined, player, this.state.board)
 		}));
 	}
 
@@ -536,7 +536,7 @@ class Game {
 		);
 	}
 
-	composeAvailableMovesFromCell(cell) {
+	composeAvailableMovesFromCell(cell, board) {
 		if (!cell.figure)
 			return [];
 		
@@ -581,7 +581,7 @@ class Game {
 			}
 
 			for (const c of to_cells_coordinates) {
-				const to_cell = this.getCellByCoordinates(coordinates_names, c, this.state.board);
+				const to_cell = this.getCellByCoordinates(coordinates_names, c, board);
 				if (!to_cell)
 					continue;
 				const actions = this.composeActionsForMove(cell, to_cell);
@@ -595,21 +595,21 @@ class Game {
 		return result;
 	}
 
-	composeAvailableMoves(player) {
+	composeAvailableMoves(player, board) {
 		const coordinates_names = this.state.config.cell.coordinates_names;
-		const unpacked_board = composeUnpackedBoard(this.state.board, coordinates_names);
+		const unpacked_board = composeUnpackedBoard(board, coordinates_names);
 		return unpacked_board
 			.filter(c => c.figure && (c.player === player))
-			.map(c => this.composeAvailableMovesFromCell(c).map(move => ({...move, ...{'from_cell': c}})))
+			.map(c => this.composeAvailableMovesFromCell(c, board).map(move => ({...move, ...{'from_cell': c}})))
 			.flat();
 	}
 
-	composeHighlightedCells(selected_cell, player) {
+	composeHighlightedCells(selected_cell, player, board) {
 		const cells = selected_cell ?
-			this.composeAvailableMovesFromCell(selected_cell)
+			this.composeAvailableMovesFromCell(selected_cell, board)
 				.map(move => move.to_cell.coordinates)
 			:
-			this.composeAvailableMoves(player)
+			this.composeAvailableMoves(player, board)
 				.map(move => move.from_cell.coordinates);
 		
 		const result = {};
@@ -632,7 +632,7 @@ class Game {
 			}
 			this.setState({
 				'selected_cell': undefined,
-				'highlighted_cells': this.composeHighlightedCells(undefined, this.getCurrentPlayer())
+				'highlighted_cells': this.composeHighlightedCells(undefined, this.getCurrentPlayer(), this.state.board)
 			});
 		}
 		else {
@@ -644,7 +644,7 @@ class Game {
 			if (selected_cell_player && (selected_cell_player === this.getCurrentGameStateInfo().parameters?.player)) {
 				this.setState({
 					'selected_cell': cell,
-					'highlighted_cells': this.composeHighlightedCells(cell)
+					'highlighted_cells': this.composeHighlightedCells(cell, undefined, this.state.board)
 				});
 			}
 		}
