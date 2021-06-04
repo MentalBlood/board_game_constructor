@@ -57,6 +57,10 @@ function joinDicts(a, b) {
 	return result;
 }
 
+function copy(something) {
+	return JSON.parse(JSON.stringify(something));
+}
+
 class Game {
 	constructor(callback_after_set_state) {
 		this.callback_after_set_state = callback_after_set_state;
@@ -602,6 +606,18 @@ class Game {
 			.filter(c => c.figure && (c.player === player))
 			.map(c => this.composeAvailableMovesFromCell(c, board).map(move => ({...move, ...{'from_cell': c}})))
 			.flat();
+	}
+
+	composeAvailableNextStates(state, player) {
+		const available_moves = this.composeAvailableMoves(player, state.board);
+		return available_moves.map(m => {
+			const new_state = copy(state);
+			new_state.board = this.composeBoardAfterActions(new_state.board, m.from_cell, m.actions);
+			return {
+				...{'board': new_state.board}, 
+				...this.composeNextActiveGameState(new_state.game_state, new_state.game_statistics, new_state.board)
+			};
+		});
 	}
 
 	composeHighlightedCells(selected_cell, player, board) {
