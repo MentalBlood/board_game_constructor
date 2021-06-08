@@ -17,9 +17,7 @@
 }
 
 .app {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-around;
+	position: relative;
 	background-color: lightgrey;
 }
 
@@ -28,7 +26,6 @@
 	flex-direction: column;
 	width: 50vw;
 	height: 99vh;
-	margin-top: 1vh;
 }
 
 .gameState {
@@ -38,7 +35,8 @@
 }
 
 .board {
-	margin: 0 auto;
+	border: 0.3vmin solid black;
+	margin: 1vh auto;
 	position: relative;
 	transition-duration: 0.5s;
 }
@@ -77,6 +75,9 @@
 }
 
 .config {
+	position: absolute;
+	left: 50vw;
+	top: 0;
 	display: flex;
 	flex-direction: column;
 	margin: 0 auto;
@@ -106,6 +107,7 @@ button {
 .configText,
 button,
 .configsList {
+	margin: 1vh 0;
 	border: 0.3vmin solid black;
 	background-color: whitesmoke;
 	outline: none;
