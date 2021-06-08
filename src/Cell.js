@@ -1,4 +1,4 @@
-'use strict';
+/** @jsx h */
 
 function composeExpressionWithParameters(expression, parameters) {
 	const letiables_defining = Object.keys(parameters).map(name => `const ${name} = ${parameters[name]};`).join('\n');

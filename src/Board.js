@@ -1,4 +1,4 @@
-'use strict';
+/** @jsx h */
 
 function isDict(something) {
 	if (something === undefined)

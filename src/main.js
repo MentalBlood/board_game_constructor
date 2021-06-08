@@ -1,6 +1,7 @@
-'use strict'
+/** @jsx h */
+const { h } = preact;
 
-class Root extends React.Component {
+class Root extends preact.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -38,10 +39,10 @@ class Root extends React.Component {
 			<div className='config'>
 				<textarea className='configText'
 					value={this.state.config_text}
-					onChange={this.game.handleConfigTextChange.bind(this.game)}></textarea>
+					onInput={this.game.handleConfigTextChange.bind(this.game)}></textarea>
 				<select className='configsList' 
 					value={this.state.config?.name} 
-					onChange={this.game.handleGameNameSelectChange.bind(this.game)}>
+					onInput={this.game.handleGameNameSelectChange.bind(this.game)}>
 					{Object.keys(configs).map(name => (
 						<option key={name} value={name}>{name}</option>
 					))}
@@ -77,4 +78,4 @@ function loadConfigs() {
 }
 
 const rootElement = document.getElementById('root');
-loadConfigs().then(() => ReactDOM.render(React.createElement(Root), rootElement));
+loadConfigs().then(() => preact.render(<Root></Root>, rootElement));
